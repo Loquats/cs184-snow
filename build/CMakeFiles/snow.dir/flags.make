@@ -6,5 +6,5 @@ CXX_FLAGS =
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/Users/andy/Dropbox/repos/cs184/cs184-snow/MathFunctions -I/Users/andy/Dropbox/repos/cs184/cs184-snow/glfw -I/Users/andy/Dropbox/repos/cs184/cs184-snow/glfw/include 
+CXX_INCLUDES = -I/Users/andy/Dropbox/repos/cs184/cs184-snow/glfw -I/Users/andy/Dropbox/repos/cs184/cs184-snow/glad/include -I/Users/andy/Dropbox/repos/cs184/cs184-snow/glfw/include 
 

@@ -90,8 +90,8 @@ snow_EXTERNAL_OBJECTS =
 
 snow: CMakeFiles/snow.dir/main.cpp.o
 snow: CMakeFiles/snow.dir/build.make
-snow: MathFunctions/libMathFunctions.a
 snow: glfw/src/libglfw3.a
+snow: libglad.a
 snow: CMakeFiles/snow.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/andy/Dropbox/repos/cs184/cs184-snow/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable snow"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/snow.dir/link.txt --verbose=$(VERBOSE)

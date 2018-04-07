@@ -6,7 +6,33 @@
 
 #IncludeRegexTransform: 
 
-../MathFunctions/MathFunctions.h
+../glad/include/KHR/khrplatform.h
+stdint.h
+-
+inttypes.h
+-
+stdint.h
+-
+
+../glad/include/glad/glad.h
+windows.h
+-
+stddef.h
+-
+KHR/khrplatform.h
+-
+inttypes.h
+-
+inttypes.h
+-
+inttypes.h
+-
+stdint.h
+-
+stdint.h
+-
+inttypes.h
+-
 
 ../glfw/include/GLFW/glfw3.h
 stddef.h
@@ -55,8 +81,8 @@ stdlib.h
 -
 math.h
 -
-MathFunctions.h
-/Users/andy/Dropbox/repos/cs184/cs184-snow/MathFunctions.h
+glad/glad.h
+-
 GLFW/glfw3.h
 -
 

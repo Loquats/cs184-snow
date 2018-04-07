@@ -6,5 +6,5 @@ C_FLAGS =
 
 C_DEFINES = 
 
-C_INCLUDES = -I/Users/andy/Dropbox/repos/cs184/cs184-snow/MathFunctions -I/Users/andy/Dropbox/repos/cs184/cs184-snow/glfw -I/Users/andy/Dropbox/repos/cs184/cs184-snow/glfw/deps -I/Users/andy/Dropbox/repos/cs184/cs184-snow/glfw/include 
+C_INCLUDES = -I/Users/andy/Dropbox/repos/cs184/cs184-snow/glfw -I/Users/andy/Dropbox/repos/cs184/cs184-snow/glfw/deps -I/Users/andy/Dropbox/repos/cs184/cs184-snow/glfw/include 
 

@@ -8,7 +8,6 @@ set(CMAKE_DEPENDS_GENERATOR "Unix Makefiles")
 set(CMAKE_MAKEFILE_DEPENDS
   "CMakeCache.txt"
   "../CMakeLists.txt"
-  "../MathFunctions/CMakeLists.txt"
   "CMakeFiles/3.6.2/CMakeCCompiler.cmake"
   "CMakeFiles/3.6.2/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.6.2/CMakeSystem.cmake"
@@ -63,7 +62,6 @@ set(CMAKE_MAKEFILE_OUTPUTS
 # Byproducts of CMake generate step:
 set(CMAKE_MAKEFILE_PRODUCTS
   "CMakeFiles/CMakeDirectoryInformation.cmake"
-  "MathFunctions/CMakeFiles/CMakeDirectoryInformation.cmake"
   "glfw/CMakeFiles/CMakeDirectoryInformation.cmake"
   "glfw/src/CMakeFiles/CMakeDirectoryInformation.cmake"
   "glfw/examples/CMakeFiles/CMakeDirectoryInformation.cmake"
@@ -72,8 +70,8 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
+  "CMakeFiles/glad.dir/DependInfo.cmake"
   "CMakeFiles/snow.dir/DependInfo.cmake"
-  "MathFunctions/CMakeFiles/MathFunctions.dir/DependInfo.cmake"
   "glfw/CMakeFiles/uninstall.dir/DependInfo.cmake"
   "glfw/src/CMakeFiles/glfw.dir/DependInfo.cmake"
   "glfw/examples/CMakeFiles/heightmap.dir/DependInfo.cmake"

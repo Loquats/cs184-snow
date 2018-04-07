@@ -10,15 +10,15 @@ set(CMAKE_CXX_COMPILER_ID "Clang")
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
-  "../MathFunctions"
   "../glfw"
+  "../glad/include"
   "../glfw/include"
   )
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/Users/andy/Dropbox/repos/cs184/cs184-snow/build/MathFunctions/CMakeFiles/MathFunctions.dir/DependInfo.cmake"
   "/Users/andy/Dropbox/repos/cs184/cs184-snow/build/glfw/src/CMakeFiles/glfw.dir/DependInfo.cmake"
+  "/Users/andy/Dropbox/repos/cs184/cs184-snow/build/CMakeFiles/glad.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

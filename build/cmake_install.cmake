@@ -29,7 +29,6 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/Users/andy/Dropbox/repos/cs184/cs184-snow/build/MathFunctions/cmake_install.cmake")
   include("/Users/andy/Dropbox/repos/cs184/cs184-snow/build/glfw/cmake_install.cmake")
 
 endif()

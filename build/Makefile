@@ -155,6 +155,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named glad
+
+# Build rule for target.
+glad: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 glad
+.PHONY : glad
+
+# fast build rule for target.
+glad/fast:
+	$(MAKE) -f CMakeFiles/glad.dir/build.make CMakeFiles/glad.dir/build
+.PHONY : glad/fast
+
+#=============================================================================
 # Target rules for targets named snow
 
 # Build rule for target.
@@ -166,19 +179,6 @@ snow: cmake_check_build_system
 snow/fast:
 	$(MAKE) -f CMakeFiles/snow.dir/build.make CMakeFiles/snow.dir/build
 .PHONY : snow/fast
-
-#=============================================================================
-# Target rules for targets named MathFunctions
-
-# Build rule for target.
-MathFunctions: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 MathFunctions
-.PHONY : MathFunctions
-
-# fast build rule for target.
-MathFunctions/fast:
-	$(MAKE) -f MathFunctions/CMakeFiles/MathFunctions.dir/build.make MathFunctions/CMakeFiles/MathFunctions.dir/build
-.PHONY : MathFunctions/fast
 
 #=============================================================================
 # Target rules for targets named uninstall
@@ -531,6 +531,33 @@ events/fast:
 	$(MAKE) -f glfw/tests/CMakeFiles/events.dir/build.make glfw/tests/CMakeFiles/events.dir/build
 .PHONY : events/fast
 
+glad/src/glad.o: glad/src/glad.c.o
+
+.PHONY : glad/src/glad.o
+
+# target to build an object file
+glad/src/glad.c.o:
+	$(MAKE) -f CMakeFiles/glad.dir/build.make CMakeFiles/glad.dir/glad/src/glad.c.o
+.PHONY : glad/src/glad.c.o
+
+glad/src/glad.i: glad/src/glad.c.i
+
+.PHONY : glad/src/glad.i
+
+# target to preprocess a source file
+glad/src/glad.c.i:
+	$(MAKE) -f CMakeFiles/glad.dir/build.make CMakeFiles/glad.dir/glad/src/glad.c.i
+.PHONY : glad/src/glad.c.i
+
+glad/src/glad.s: glad/src/glad.c.s
+
+.PHONY : glad/src/glad.s
+
+# target to generate assembly for a file
+glad/src/glad.c.s:
+	$(MAKE) -f CMakeFiles/glad.dir/build.make CMakeFiles/glad.dir/glad/src/glad.c.s
+.PHONY : glad/src/glad.c.s
+
 main.o: main.cpp.o
 
 .PHONY : main.o
@@ -566,12 +593,12 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... list_install_components"
+	@echo "... glad"
 	@echo "... install"
 	@echo "... install/strip"
 	@echo "... install/local"
 	@echo "... edit_cache"
 	@echo "... snow"
-	@echo "... MathFunctions"
 	@echo "... uninstall"
 	@echo "... glfw"
 	@echo "... heightmap"
@@ -599,6 +626,9 @@ help:
 	@echo "... iconify"
 	@echo "... joysticks"
 	@echo "... events"
+	@echo "... glad/src/glad.o"
+	@echo "... glad/src/glad.i"
+	@echo "... glad/src/glad.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
