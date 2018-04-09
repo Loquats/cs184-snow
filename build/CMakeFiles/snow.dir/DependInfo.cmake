@@ -4,21 +4,28 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/Users/andy/Dropbox/repos/cs184/cs184-snow/main.cpp" "/Users/andy/Dropbox/repos/cs184/cs184-snow/build/CMakeFiles/snow.dir/main.cpp.o"
+  "/Users/ankit/Dropbox/School/College/Year4/graphics/cs184-snow/main.cpp" "/Users/ankit/Dropbox/School/College/Year4/graphics/cs184-snow/build/CMakeFiles/snow.dir/main.cpp.o"
   )
-set(CMAKE_CXX_COMPILER_ID "Clang")
+set(CMAKE_CXX_COMPILER_ID "AppleClang")
+
+# Preprocessor definitions for this target.
+set(CMAKE_TARGET_DEFINITIONS_CXX
+  "GLFW_INCLUDE_NONE"
+  )
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
-  "../glfw"
-  "../glad/include"
-  "../glfw/include"
+  "../main.cpp"
+  "../libraries/glm"
+  "../libraries/glfw/include"
+  "../libraries/glad/include"
   )
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/Users/andy/Dropbox/repos/cs184/cs184-snow/build/glfw/src/CMakeFiles/glfw.dir/DependInfo.cmake"
-  "/Users/andy/Dropbox/repos/cs184/cs184-snow/build/CMakeFiles/glad.dir/DependInfo.cmake"
+  "/Users/ankit/Dropbox/School/College/Year4/graphics/cs184-snow/build/CMakeFiles/glm.dir/DependInfo.cmake"
+  "/Users/ankit/Dropbox/School/College/Year4/graphics/cs184-snow/build/libraries/glfw/src/CMakeFiles/glfw.dir/DependInfo.cmake"
+  "/Users/ankit/Dropbox/School/College/Year4/graphics/cs184-snow/build/CMakeFiles/glad.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

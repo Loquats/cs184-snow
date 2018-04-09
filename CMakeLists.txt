@@ -10,6 +10,8 @@ add_executable(snow main.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE main.cpp)
 
 
+include_directories("libraries/glm/")
+
 
 set(GLFW_DIR "libraries/glfw")
 add_subdirectory (${GLFW_DIR})

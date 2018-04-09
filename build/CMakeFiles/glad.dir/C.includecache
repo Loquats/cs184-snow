@@ -1,4 +1,4 @@
-#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
 
 #IncludeRegexScan: ^.*$
 
@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-../glad/include/KHR/khrplatform.h
+../libraries/glad/include/KHR/khrplatform.h
 stdint.h
 -
 inttypes.h
@@ -14,7 +14,7 @@ inttypes.h
 stdint.h
 -
 
-../glad/include/glad/glad.h
+../libraries/glad/include/glad/glad.h
 windows.h
 -
 stddef.h
@@ -34,7 +34,7 @@ stdint.h
 inttypes.h
 -
 
-/Users/andy/Dropbox/repos/cs184/cs184-snow/glad/src/glad.c
+/Users/ankit/Dropbox/School/College/Year4/graphics/cs184-snow/libraries/glad/src/glad.c
 stdio.h
 -
 stdlib.h

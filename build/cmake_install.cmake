@@ -1,4 +1,4 @@
-# Install script for directory: /Users/andy/Dropbox/repos/cs184/cs184-snow
+# Install script for directory: /Users/ankit/Dropbox/School/College/Year4/graphics/cs184-snow
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -27,9 +27,14 @@ if(NOT CMAKE_INSTALL_COMPONENT)
   endif()
 endif()
 
+# Is this installation the result of a crosscompile?
+if(NOT DEFINED CMAKE_CROSSCOMPILING)
+  set(CMAKE_CROSSCOMPILING "FALSE")
+endif()
+
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/Users/andy/Dropbox/repos/cs184/cs184-snow/build/glfw/cmake_install.cmake")
+  include("/Users/ankit/Dropbox/School/College/Year4/graphics/cs184-snow/build/libraries/glfw/cmake_install.cmake")
 
 endif()
 
@@ -41,5 +46,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/Users/andy/Dropbox/repos/cs184/cs184-snow/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/Users/ankit/Dropbox/School/College/Year4/graphics/cs184-snow/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

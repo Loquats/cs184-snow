@@ -4,14 +4,14 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/Users/andy/Dropbox/repos/cs184/cs184-snow/glad/src/glad.c" "/Users/andy/Dropbox/repos/cs184/cs184-snow/build/CMakeFiles/glad.dir/glad/src/glad.c.o"
+  "/Users/ankit/Dropbox/School/College/Year4/graphics/cs184-snow/libraries/glad/src/glad.c" "/Users/ankit/Dropbox/School/College/Year4/graphics/cs184-snow/build/CMakeFiles/glad.dir/libraries/glad/src/glad.c.o"
   )
-set(CMAKE_C_COMPILER_ID "Clang")
+set(CMAKE_C_COMPILER_ID "AppleClang")
 
 # The include file search paths:
 set(CMAKE_C_TARGET_INCLUDE_PATH
-  "../glfw"
-  "../glad/include"
+  "../libraries/glm"
+  "../libraries/glad/include"
   )
 
 # Targets to which this target links.
