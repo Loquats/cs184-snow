@@ -5,6 +5,15 @@
 #include <cstdlib>
 #include <glm/vec3.hpp>
 
+#include <iostream>
+#include <vector>
+#include "glm/ext.hpp"
+#include "src/particle.h"
+#include "src/interpolation.h"
+#include "src/grid.h"
+
+using namespace std;
+
 static void error_callback(int error, const char* description)
 {
     fprintf(stderr, "Error: %s\n", description);
@@ -44,6 +53,38 @@ int main(void)
     printf("OpenGL %d.%d\n", GLVersion.major, GLVersion.minor);
     printf("OpenGL %s, GLSL %s\n", glGetString(GL_VERSION),
     glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+    // test_particle();
+    // test_grid_node();
+
+    size_t dim_x = 10;
+    size_t dim_y = 11;
+    size_t dim_z = 12;
+    // Grid grid = init_grid(dim_x, dim_y, dim_z);
+    Grid* grid = new Grid(dim_x, dim_y, dim_z, 1.0);
+    // cout << grid->h << "\n";
+    // print_grid_node(grid->nodes[dim_x-1][dim_y-1][dim_z-1]);
+
+    // Put a test particle
+    Particle* a_particle = new Particle(glm::vec3(4.5, 5.5, 6.5), 10);
+    a_particle->velocity = glm::vec3(1.0, 2.0, 3.0);
+    grid->nodes[4][5][6]->particles.push_back(a_particle);
+    // cout << grid->nodes.size() << " " << grid->nodes[0].size() << " " << grid->nodes[0][0].size() << "\n";
+    // cout << grid->nodes[4][5][6]->particles.size() << "\n";
+    // cout << grid->nodes[4][5][7]->particles.size() << "\n";
+    
+    particle_to_grid(grid);
+    // for (int i = 0; i < 10; ++i) {
+    //     for (int j = 3; j < 9; ++j) {
+    //         for (int k = 4; k < 10; k++) {
+    //             // cout << glm::to_string(grid[i][j][k]->velocity) << " ";
+    //             cout << grid->nodes[i][j][k]->mass << " ";
+    //         }
+    //         cout << "\n";
+    //     }
+    //     cout << "\n";
+    // }
+
     while (!glfwWindowShouldClose(window))
     {
 
