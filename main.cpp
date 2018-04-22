@@ -74,6 +74,9 @@ int main(void)
     // cout << grid->nodes[4][5][7]->particles.size() << "\n";
     
     particle_to_grid(grid);
+    compute_particle_volumes(grid);
+    // cout << grid->nodes[4][5][6]->particles[0]->mass << "\n";
+    // cout << grid->nodes[4][5][6]->particles[0]->volume << "\n";
     // for (int i = 0; i < 10; ++i) {
     //     for (int j = 3; j < 9; ++j) {
     //         for (int k = 4; k < 10; k++) {

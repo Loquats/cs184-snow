@@ -72,6 +72,40 @@ void particle_to_grid(Grid* grid) {
 	}
 }
 
+/*
+* Step 2: compute the density and volume of each particle
+*/
+void compute_particle_volumes(Grid* grid) {
+	float h3 = pow(grid->h, 3);
+	for (int i = 0; i < grid->nodes.size(); ++i) {
+		for (int j = 0; j < grid->nodes[i].size(); ++j) {
+			for (int k = 0; k < grid->nodes[i][j].size(); ++k) {
+				for (Particle* particle : grid->nodes[i][j][k]->particles) {
+					glm::vec3 pos = particle->position;
+					int i_lo = max((int) ceil(pos.x / grid->h - 2), 0);
+					int i_hi = min((int) floor(pos.x / grid->h + 2) + 1, (int) grid->nodes.size());
+					int j_lo = max((int) ceil(pos.y / grid->h - 2), 0);
+					int j_hi = min((int) floor(pos.y / grid->h + 2) + 1, (int) grid->nodes[i].size());
+					int k_lo = max((int) ceil(pos.z / grid->h - 2), 0);
+					int k_hi = min((int) floor(pos.z / grid->h + 2) + 1, (int) grid->nodes[i][j].size());
+
+					float density = 0;
+					for (int dest_i = i_lo; dest_i < i_hi; ++dest_i) {
+						for (int dest_j = j_lo; dest_j < j_hi; ++dest_j) {
+							for (int dest_k = k_lo; dest_k < k_hi; ++dest_k) {
+								float weight = b_spline(pos, glm::vec3(dest_i, dest_j, dest_k), grid->h);
+								density += weight * grid->nodes[dest_i][dest_j][dest_k]->mass;
+							}
+						}
+					}
+					density /= h3;
+					particle->volume = particle->mass / density;
+				}
+			}
+		}
+	}
+}
+
 ///////////////////////////////
 
 void print_grid_node(GridNode* node) {
