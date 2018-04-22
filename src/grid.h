@@ -7,6 +7,7 @@ struct GridNode {
 
 	float mass;			// interpolated mass
 	glm::vec3 velocity;	// interpolated velocity
+	glm::vec3 force;
 	vector<Particle *> particles;
 };
 
@@ -100,6 +101,42 @@ void compute_particle_volumes(Grid* grid) {
 					}
 					density /= h3;
 					particle->volume = particle->mass / density;
+				}
+			}
+		}
+	}
+}
+
+/*
+* Step 3: compute force for each grid cell
+*/
+void compute_grid_forces(Grid* grid) {
+	float h3 = pow(grid->h, 3);
+	for (int i = 0; i < grid->nodes.size(); ++i) {
+		for (int j = 0; j < grid->nodes[i].size(); ++j) {
+			for (int k = 0; k < grid->nodes[i][j].size(); ++k) {
+				for (Particle* particle : grid->nodes[i][j][k]->particles) {
+					glm::vec3 pos = particle->position;
+					int i_lo = max((int) ceil(pos.x / grid->h - 2), 0);
+					int i_hi = min((int) floor(pos.x / grid->h + 2) + 1, (int) grid->nodes.size());
+					int j_lo = max((int) ceil(pos.y / grid->h - 2), 0);
+					int j_hi = min((int) floor(pos.y / grid->h + 2) + 1, (int) grid->nodes[i].size());
+					int k_lo = max((int) ceil(pos.z / grid->h - 2), 0);
+					int k_hi = min((int) floor(pos.z / grid->h + 2) + 1, (int) grid->nodes[i][j].size());
+
+					float volume_n = particle->volume * determinant(particle->deformation_grad);
+					float sigma_p = 0;	// TODO: compute this motherfucker, which is actually a matrix
+
+					float neg_force_unweighted = volume_n * sigma_p;
+
+					for (int dest_i = i_lo; dest_i < i_hi; ++dest_i) {
+						for (int dest_j = j_lo; dest_j < j_hi; ++dest_j) {
+							for (int dest_k = k_lo; dest_k < k_hi; ++dest_k) {
+								glm::vec3 weight_grad = b_spline_grad(pos, glm::vec3(dest_i, dest_j, dest_k), grid->h);
+								grid->nodes[dest_i][dest_j][dest_k]->force -= neg_force_unweighted * weight_grad;
+							}
+						}
+					}
 				}
 			}
 		}
