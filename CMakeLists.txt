@@ -7,8 +7,8 @@ project (snow)
 
 
 # add the executable
-add_executable(snow main.cpp)
-target_include_directories(${PROJECT_NAME} PRIVATE main.cpp)
+add_executable(snow src/main.cpp src/grid.cpp src/particle.cpp)
+target_include_directories(${PROJECT_NAME} PRIVATE src/main.cpp)
 
 
 include_directories("libraries/glm/")

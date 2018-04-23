@@ -8,9 +8,9 @@
 #include <iostream>
 #include <vector>
 #include "glm/ext.hpp"
-#include "src/particle.h"
-#include "src/interpolation.h"
-#include "src/grid.h"
+#include "particle.h"
+#include "grid.h"
+
 
 using namespace std;
 
@@ -68,11 +68,13 @@ int main(void)
     // Put a test particle
     Particle* a_particle = new Particle(glm::vec3(4.5, 5.5, 6.5), 10);
     a_particle->velocity = glm::vec3(1.0, 2.0, 3.0);
-    grid->nodes[4][5][6]->particles.push_back(a_particle);
+    vector<vector<vector<GridNode *> > > bla = grid->nodes;
     // cout << grid->nodes.size() << " " << grid->nodes[0].size() << " " << grid->nodes[0][0].size() << "\n";
     // cout << grid->nodes[4][5][6]->particles.size() << "\n";
     // cout << grid->nodes[4][5][7]->particles.size() << "\n";
-    
+
+
+
     particle_to_grid(grid);
     compute_particle_volumes(grid);
     // cout << grid->nodes[4][5][6]->particles[0]->mass << "\n";

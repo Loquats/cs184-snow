@@ -1,3 +1,6 @@
+#ifndef INTERPOLATION_H
+#define INTERPOLATION_H
+
 #include <glm/glm.hpp>
 
 /* sign function: https://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
@@ -50,3 +53,5 @@ glm::vec3 b_spline_grad(glm::vec3 particle_pos, glm::vec3 grid_index, float h) {
 	float dz = components.x * components.y * N_func_derivative(scaled.z) / h;
 	return glm::vec3(dx, dy , dz);
 }
+
+#endif /* INTERPOLATION_H */
