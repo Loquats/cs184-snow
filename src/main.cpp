@@ -10,7 +10,14 @@
 #include "glm/ext.hpp"
 #include "particle.h"
 #include "grid.h"
+#include "camera.h"
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
 
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+float lastX = SCR_WIDTH / 2.0f;
+float lastY = SCR_HEIGHT / 2.0f;
+bool firstMouse = true;
 
 using namespace std;
 
@@ -27,10 +34,12 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 static int init_shaders() {
   const char *vertexShaderSource = "#version 330 core\n"
           "layout (location = 0) in vec3 aPos;\n"
+          "uniform mat4 view;\n"
+          "uniform mat4 projection;"
           "void main()\n"
           "{\n"
           "   gl_PointSize = 10.0;\n"
-          "   gl_Position = vec4(aPos, 1.0);\n"
+          "   gl_Position = projection * view * vec4(aPos, 1.0f);\n"
           "}\0";
   const char *fragmentShaderSource = "#version 330 core\n"
           "out vec4 FragColor;\n"
@@ -80,6 +89,26 @@ static int init_shaders() {
   glUseProgram(shaderProgram);
   return shaderProgram;
 }
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+  if (firstMouse)
+  {
+    lastX = xpos;
+    lastY = ypos;
+    firstMouse = false;
+  }
+
+  float xoffset = xpos - lastX;
+  float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+  lastX = xpos;
+  lastY = ypos;
+
+  camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+
+
 int main(void)
 {
     GLFWwindow* window;
@@ -98,6 +127,8 @@ int main(void)
     }
     glfwSetKeyCallback(window, key_callback);
     glfwMakeContextCurrent(window);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(window, mouse_callback);
     int gladInitRes = gladLoadGL();
     if (!gladInitRes) {
       fprintf(stderr, "Unable to initialize glad\n");
@@ -141,10 +172,12 @@ int main(void)
           0.5f,  0.5f, 0.0f,  // top right
           0.5f, -0.5f, 0.0f,  // bottom right
           -0.5f, -0.5f, 0.0f,  // bottom left
-          -0.5f,  0.5f, 0.0f   // top left
+          -0.5f,  0.5f, 0.9f   // top left
   };
 
+  // from learnopengl tutorial https://learnopengl.com/code_viewer_gh.php?code=src/1.getting_started/2.1.hello_triangle/hello_triangle.cpp
   unsigned int VBO, VAO;
+
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
   // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
@@ -172,13 +205,17 @@ int main(void)
 
 
       glUseProgram(shader_program);
+
+      glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+      glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 1, GL_FALSE, &projection[0][0]);
+
+      // camera/view transformation
+      glm::mat4 view = camera.GetViewMatrix();
+      glUniformMatrix4fv(glGetUniformLocation(shader_program, "view"), 1, GL_FALSE, &view[0][0]);
+
       glBindVertexArray(VAO);
-      glDrawArrays(GL_POINTS, 0, 3);
+      glDrawArrays(GL_POINTS, 0, 4);
 
-
-//      glBindVertexArray(VAO);
-//      glDrawArrays(GL_POINTS, 0, 4);
-//
       glfwSwapBuffers(window);
       glfwPollEvents();
     }

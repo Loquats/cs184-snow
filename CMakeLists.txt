@@ -7,7 +7,7 @@ project (snow)
 
 
 # add the executable
-add_executable(snow src/main.cpp src/grid.cpp src/particle.cpp)
+add_executable(snow src/main.cpp src/grid.cpp src/particle.cpp src/camera.h)
 target_include_directories(${PROJECT_NAME} PRIVATE src/main.cpp)
 
 
