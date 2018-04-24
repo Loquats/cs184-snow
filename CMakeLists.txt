@@ -2,14 +2,16 @@ cmake_minimum_required (VERSION 3.1)
 set (CMAKE_CXX_STANDARD 11)
 project (snow)
 
+find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 
 
 
 # add the executable
-add_executable(snow src/main.cpp src/grid.cpp src/particle.cpp)
+add_executable(snow src/main.cpp src/grid.cpp src/particle.cpp src/force.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE src/main.cpp)
 
+target_link_libraries (snow Eigen3::Eigen)
 
 include_directories("libraries/glm/")
 

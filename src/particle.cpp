@@ -8,7 +8,7 @@ void test_particle() {
   Particle* particle = new Particle(cool_vec, mass);
   printf("particle position: %f %f %f\n", particle->position.x, particle->position.y, particle->position.z);
   printf("particle velocity: %f %f %f\n", particle->velocity.x, particle->velocity.y, particle->velocity.z);
-  std::cout << glm::to_string(particle->deformation_grad) << "\n"; // <- to_string... nice!!
+  std::cout << glm::to_string(particle->deformation_grad_E) << "\n"; // <- to_string... nice!!
 
   std::cout << glm::to_string(particle->position * 0.5f) << "\n"; // <- to_string... nice!!
 }

@@ -4,6 +4,7 @@
 #include "grid.h"
 #include "particle.h"
 #include "interpolation.h"
+#include "force.h"
 
 /*
 * Step 1: compute the mass and velocity of each grid node based the particles
@@ -82,9 +83,9 @@ void compute_particle_volumes(Grid* grid) {
 }
 
 /*
-* Step 3: compute force for each grid cell
+* preparation for Step 3: compute F_hat_Ep for each particle
 */
-void compute_grid_forces(Grid* grid) {
+void compute_F_hat_Ep(Grid* grid, float delta_t) {
   float h3 = pow(grid->h, 3);
   for (int i = 0; i < grid->nodes.size(); ++i) {
     for (int j = 0; j < grid->nodes[i].size(); ++j) {
@@ -98,10 +99,45 @@ void compute_grid_forces(Grid* grid) {
           int k_lo = max((int) ceil(pos.z / grid->h - 2), 0);
           int k_hi = min((int) floor(pos.z / grid->h + 2) + 1, (int) grid->nodes[i][j].size());
 
-          float volume_n = particle->volume * determinant(particle->deformation_grad);
-          float sigma_p = 0;	// TODO: compute this motherfucker, which is actually a matrix
+          glm::mat3 sum = glm::mat3(0.0f);
+          for (int dest_i = i_lo; dest_i < i_hi; ++dest_i) {
+            for (int dest_j = j_lo; dest_j < j_hi; ++dest_j) {
+              for (int dest_k = k_lo; dest_k < k_hi; ++dest_k) {
+                glm::vec3 weight_grad = b_spline_grad(pos, glm::vec3(dest_i, dest_j, dest_k), grid->h);
+                glm::vec3 velocity = grid->nodes[dest_i][dest_j][dest_k]->velocity;
+                sum += delta_t * outerProduct(velocity, weight_grad);
+              }
+            }
+          }
+          glm::mat3 identity = glm::mat3(1.0f);
+          particle->F_hat_Ep = (identity + sum) * particle->deformation_grad_P;
+        }
+      }
+    }
+  }
+}
 
-          float neg_force_unweighted = volume_n * sigma_p;
+/*
+* Step 3: compute force for each grid cell
+*/
+void compute_grid_forces(Grid* grid, float mu_0, float lambda_0, float xi) {
+  float h3 = pow(grid->h, 3);
+  for (int i = 0; i < grid->nodes.size(); ++i) {
+    for (int j = 0; j < grid->nodes[i].size(); ++j) {
+      for (int k = 0; k < grid->nodes[i][j].size(); ++k) {
+        for (Particle* particle : grid->nodes[i][j][k]->particles) {
+          glm::vec3 pos = particle->position;
+          int i_lo = max((int) ceil(pos.x / grid->h - 2), 0);
+          int i_hi = min((int) floor(pos.x / grid->h + 2) + 1, (int) grid->nodes.size());
+          int j_lo = max((int) ceil(pos.y / grid->h - 2), 0);
+          int j_hi = min((int) floor(pos.y / grid->h + 2) + 1, (int) grid->nodes[i].size());
+          int k_lo = max((int) ceil(pos.z / grid->h - 2), 0);
+          int k_hi = min((int) floor(pos.z / grid->h + 2) + 1, (int) grid->nodes[i][j].size());
+
+          float volume = particle->volume;
+          glm::mat3 sigma_p = psi_derivative(mu_0, lambda_0, xi, particle) * transpose(particle->deformation_grad_P);
+
+          glm::mat3 neg_force_unweighted = volume * sigma_p;
 
           for (int dest_i = i_lo; dest_i < i_hi; ++dest_i) {
             for (int dest_j = j_lo; dest_j < j_hi; ++dest_j) {
