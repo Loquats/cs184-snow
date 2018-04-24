@@ -37,9 +37,25 @@ struct Grid {
 
 };
 
+/*
+* Step 1: compute the mass and velocity of each grid node based the particles
+* in its neighborhood
+*/
 void particle_to_grid(Grid* grid);
+
+/*
+* Step 2: compute the density and volume of each particle
+*/
 void compute_particle_volumes(Grid* grid);
+
+/*
+* preparation for Step 3: compute F_hat_Ep for each particle
+*/
 void compute_F_hat_Ep(Grid* grid, float delta_t);
+
+/*
+* Step 3: compute force for each grid cell
+*/
 void compute_grid_forces(Grid* grid, float mu_0, float lambda_0, float xi);
 
 #endif /* GRID_H */

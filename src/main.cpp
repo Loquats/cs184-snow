@@ -47,7 +47,7 @@ static int init_shaders() {
           "out vec4 FragColor;\n"
           "void main()\n"
           "{\n"
-          "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+          "   FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
           "}\n\0";
   // build and compile our shader program
   // ------------------------------------
@@ -190,12 +190,17 @@ int main(void)
   int shader_program = init_shaders();
 
 
-  float vertices[] = {
-          0.5f,  0.5f, 0.0f,  // top right
-          0.5f, -0.5f, 0.0f,  // bottom right
-          -0.5f, -0.5f, 0.0f,  // bottom left
-          -0.5f,  0.5f, 0.9f   // top left
-  };
+  // float vertices[] = {
+  //         0.5f,  0.5f, 0.0f,  // top right
+  //         0.5f, -0.5f, 0.0f,  // bottom right
+  //         -0.5f, -0.5f, 0.0f,  // bottom left
+  //         -0.5f,  0.5f, 0.9f   // top left
+  // };
+  float vertices[50*3];
+  for (int i = 0; i < 50*3; ++i) {
+    float r = (float) rand() / (float) RAND_MAX;
+    vertices[i] = r - 0.5;
+  }
 
   // from learnopengl tutorial https://learnopengl.com/code_viewer_gh.php?code=src/1.getting_started/2.1.hello_triangle/hello_triangle.cpp
   unsigned int VBO, VAO;
@@ -222,7 +227,7 @@ int main(void)
   while (!glfwWindowShouldClose(window))
     {
 
-      glClearColor(0.1f, 0.3f, 0.9f, 1.0f);
+      glClearColor(0.4f, 0.6f, 0.8f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT);
 
 
@@ -236,12 +241,12 @@ int main(void)
       glUniformMatrix4fv(glGetUniformLocation(shader_program, "view"), 1, GL_FALSE, &view[0][0]);
 
       glBindVertexArray(VAO);
-      glDrawArrays(GL_POINTS, 0, 4);
+      glDrawArrays(GL_POINTS, 0, 50);
 
       glfwSwapBuffers(window);
       glfwPollEvents();
     }
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     glfwDestroyWindow(window);
     glfwTerminate();

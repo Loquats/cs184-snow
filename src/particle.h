@@ -13,10 +13,8 @@ struct Particle {
   float mass;
   float volume;
 
-  // I think deformation gradient is a 3x3 matrix but not totally sure
   glm::mat3 deformation_grad_E;
   glm::mat3 deformation_grad_P;
-  // ^ these are by default an identity matrix
 
   // for step 3
   glm::mat3 F_hat_Ep;
