@@ -98,7 +98,7 @@ void SnowSimulator::drawContents() {
     vector<vec3> external_accelerations = {gravity};
 
     for (int i = 0; i < simulation_steps; i++) {
-      grid->simulate(frames_per_sec, simulation_steps, external_accelerations, collision_objects);
+//      grid->simulate(frames_per_sec, simulation_steps, external_accelerations, collision_objects);
     }
   }
 //
@@ -141,6 +141,8 @@ void SnowSimulator::drawGrid() {
 }
 
 void SnowSimulator::drawParticles() {
+
+
 }
 // ----------------------------------------------------------------------------
 // CAMERA CALCULATIONS
