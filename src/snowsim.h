@@ -12,6 +12,8 @@
 #include <Eigen/Dense>
 using Eigen::MatrixXd;
 
+using namespace glm;
+
 class SnowSimulator {
 public:
   SnowSimulator();
@@ -45,9 +47,11 @@ private:
 
   // Default simulation values
 
-//  int frames_per_sec = 90;
-//  int simulation_steps = 30;
+  //todo we probably need to fuck with this
+  int frames_per_sec = 60;
+  int simulation_steps = 30;
 
+  glm::vec3 gravity = glm::vec3(0.0f, -9.8f, 0.0f);
 
   Grid *grid;
 //  ClothParameters *cp;

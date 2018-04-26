@@ -12,6 +12,8 @@
 #include "grid.h"
 #include "force.h"
 #include "camera.h"
+#include "snowsim.h"
+
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
@@ -154,38 +156,46 @@ int main(void)
 
   loadOpenGl();
 
-    // NOTE: OpenGL error checks have been omitted for brevity
-    printf("OpenGL %d.%d\n", GLVersion.major, GLVersion.minor);
-    printf("OpenGL %s, GLSL %s\n", glGetString(GL_VERSION),
-    glGetString(GL_SHADING_LANGUAGE_VERSION));
+  // NOTE: OpenGL error checks have been omitted for brevity
+  printf("OpenGL %d.%d\n", GLVersion.major, GLVersion.minor);
+  printf("OpenGL %s, GLSL %s\n", glGetString(GL_VERSION),
+  glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-    glGetError(); // pull and ignore unhandled errors like GL_INVALID_ENUM
+  glGetError(); // pull and ignore unhandled errors like GL_INVALID_ENUM
 
-    // test_particle();
-    // test_grid_node();
+  // test_particle();
+  // test_grid_node();
 
-    size_t dim_x = 10;
-    size_t dim_y = 11;
-    size_t dim_z = 12;
-    Grid* grid = new Grid(dim_x, dim_y, dim_z, 1.0);
-    // print_grid_node(grid->nodes[dim_x-1][dim_y-1][dim_z-1]);
+  size_t dim_x = 10;
+  size_t dim_y = 11;
+  size_t dim_z = 12;
+  Grid* grid = new Grid(dim_x, dim_y, dim_z, 1.0);
 
-    // Put a test particle
-    Particle* a_particle = new Particle(glm::vec3(4.5, 5.5, 6.5), 10);
-    a_particle->velocity = glm::vec3(1.0, 2.0, 3.0);
-    grid->nodes[4][5][6]->particles.push_back(a_particle);
-    // cout << grid->nodes.size() << " " << grid->nodes[0].size() << " " << grid->nodes[0][0].size() << "\n";
-    // cout << grid->nodes[4][5][6]->particles.size() << "\n";
-    // cout << grid->nodes[4][5][7]->particles.size() << "\n";
+  SnowSimulator *snowsim = new SnowSimulator();
+  snowsim->loadGrid(grid);
+  //todo define object schemas and shit and find way to load
+//  snowsim->loadCollisionObjects(&objects);
+  snowsim->init();
 
-    float delta_t = 0.0001; // todo: move these constants elsewhere
-    float mu_0 = 1.0;
-    float lambda_0 = 1.0;
-    float xi = 10;
-    particle_to_grid(grid);
-    compute_particle_volumes(grid);
-    compute_F_hat_Ep(grid, delta_t);
-    compute_grid_forces(grid, mu_0, lambda_0, xi);
+
+  // print_grid_node(grid->nodes[dim_x-1][dim_y-1][dim_z-1]);
+
+  // Put a test particle
+  Particle* a_particle = new Particle(glm::vec3(4.5, 5.5, 6.5), 10);
+  a_particle->velocity = glm::vec3(1.0, 2.0, 3.0);
+  grid->nodes[4][5][6]->particles.push_back(a_particle);
+  // cout << grid->nodes.size() << " " << grid->nodes[0].size() << " " << grid->nodes[0][0].size() << "\n";
+  // cout << grid->nodes[4][5][6]->particles.size() << "\n";
+  // cout << grid->nodes[4][5][7]->particles.size() << "\n";
+
+  float delta_t = 0.0001; // todo: move these constants elsewhere
+  float mu_0 = 1.0;
+  float lambda_0 = 1.0;
+  float xi = 10;
+  particle_to_grid(grid);
+  compute_particle_volumes(grid);
+  compute_F_hat_Ep(grid, delta_t);
+  compute_grid_forces(grid, mu_0, lambda_0, xi);
 
   for (int i = 0; i < grid->nodes.size(); ++i) {
     for (int j = 0; j < grid->nodes[i].size(); ++j) {
@@ -227,6 +237,9 @@ int main(void)
 
   while (!glfwWindowShouldClose(window))
     {
+      glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      snowsim->drawContents();
 
       glfwPollEvents();
 

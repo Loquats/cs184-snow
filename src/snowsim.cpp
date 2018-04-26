@@ -92,15 +92,15 @@ void SnowSimulator::init() {
 
 void SnowSimulator::drawContents() {
   // TODO
-//  glEnable(GL_DEPTH_TEST);
-//
-//  if (!is_paused) {
-//    vector<Vector3D> external_accelerations = {gravity};
-//
-//    for (int i = 0; i < simulation_steps; i++) {
-//      cloth->simulate(frames_per_sec, simulation_steps, cp, external_accelerations, collision_objects);
-//    }
-//  }
+  glEnable(GL_DEPTH_TEST);
+
+  if (!is_paused) {
+    vector<vec3> external_accelerations = {gravity};
+
+    for (int i = 0; i < simulation_steps; i++) {
+      grid->simulate(frames_per_sec, simulation_steps, external_accelerations, collision_objects);
+    }
+  }
 //
 //  // Bind the active shader
 //
