@@ -27,6 +27,11 @@ glm::mat3 eigen_to_glm(Matrix3f F) {
 	return F_glm;
 }
 
+glm::vec3 eigen_to_glm(Vector3f v) {
+	glm::vec3 v_glm = glm::vec3(v(0), v(1), v(2));
+	return v_glm;
+}
+
 /*
 Let the polar decomposition of F be F = RS. Return R.
 Computed by taking the SVD of F as F = USV^t, and R = UV^*
@@ -43,7 +48,7 @@ glm::mat3 polar_R(glm::mat3 F) {
 
 glm::mat3 psi_derivative(float mu_0, float lambda_0, float xi, Particle* particle) {
 	float J_p = determinant(particle->deformation_grad_P);
-	float J_e = determinant(particle->deformation_grad_E);
+	float J_e = determinant(particle->F_hat_Ep);
 	glm::mat3 R_E = polar_R(particle->F_hat_Ep);
 	return 2 * lame_mu(mu_0, xi, J_p) * (particle->F_hat_Ep - R_E) + lame_lambda(lambda_0, xi, J_p) * (J_e - 1) * J_e * inverse(transpose(particle->F_hat_Ep));
 }

@@ -58,4 +58,9 @@ void compute_F_hat_Ep(Grid* grid, float delta_t);
 */
 void compute_grid_forces(Grid* grid, float mu_0, float lambda_0, float xi);
 
+/*
+* Step 7: update deformation gradients for each particle
+*/
+void update_deformation_gradients(Grid* grid, float theta_c, float theta_s);
+
 #endif /* GRID_H */
