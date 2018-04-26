@@ -8,7 +8,8 @@ find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 
 # add the executable
-add_executable(snow src/main.cpp src/grid.cpp src/particle.cpp src/camera.h src/force.cpp)
+add_executable(snow src/main.cpp src/grid.cpp src/particle.cpp src/camera.h src/force.cpp src/snowsim.h
+        src/collision/plane.cpp src/collision/sphere.cpp src/snowsim.cpp src/misc/sphere_drawing.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE src/main.cpp)
 
 target_link_libraries (snow Eigen3::Eigen)
