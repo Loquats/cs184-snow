@@ -44,7 +44,10 @@ void SnowSimulator::loadCollisionObjects(vector<CollisionObject *> *objects) { t
  * Initializes the cloth simulation and spawns a new thread to separate
  * rendering from simulation.
  */
-void SnowSimulator::init() {
+void SnowSimulator::init(Camera *camera, Shader *shader) {
+  this->camera = camera;
+  this->shader = shader;
+
   // Initialize GUI
 //  initGUI(screen);
 //  screen->setSize(default_window_size);
@@ -91,6 +94,14 @@ void SnowSimulator::init() {
 
 
 void SnowSimulator::drawContents() {
+  // pass projection matrix to shader (note that in this case it could change every frame)
+  glm::mat4 projection = glm::perspective(glm::radians(camera->Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+  shader->setMat4("projection", projection);
+
+  // camera/view transformation
+  glm::mat4 view = camera->GetViewMatrix();
+  shader->setMat4("view", view);
+
   // TODO
   glEnable(GL_DEPTH_TEST);
 

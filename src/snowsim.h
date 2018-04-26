@@ -8,6 +8,8 @@
 #include <stdbool.h>
 #include "grid.h"
 #include "collision/collisionObject.h"
+#include "camera.h"
+#include "shader.h"
 
 #include <Eigen/Dense>
 using Eigen::MatrixXd;
@@ -19,7 +21,7 @@ public:
   SnowSimulator();
   ~SnowSimulator();
 
-  void init();
+  void init(Camera *camera, Shader *shader);
 
   void loadGrid(struct Grid *grid);
 //  void loadClothParameters(ClothParameters *cp);
@@ -57,10 +59,15 @@ private:
 //  ClothParameters *cp;
   vector<CollisionObject *> *collision_objects;
 
+  Shader *shader;
+
+
+  const unsigned int SCR_WIDTH = 800;
+  const unsigned int SCR_HEIGHT = 600;
 
   // Camera attributes
 
-//  CGL::Camera camera;
+  Camera *camera;
 //  CGL::Camera canonicalCamera;
 
   double view_distance;

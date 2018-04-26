@@ -17,7 +17,6 @@
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
-
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
@@ -131,6 +130,16 @@ void setGlfwCallbacks() {
   glfwSetScrollCallback(window, scroll_callback);
 }
 
+void cameraInputTick() {
+  // per-frame time logic
+  // --------------------
+  float currentFrame = glfwGetTime();
+  deltaTime = currentFrame - lastFrame;
+  lastFrame = currentFrame;
+
+  processInput(window);
+}
+
 int main(void)
 {
 
@@ -160,7 +169,6 @@ int main(void)
   snowsim->loadGrid(grid);
   //todo define object schemas and shit and find way to load
 //  snowsim->loadCollisionObjects(&objects);
-  snowsim->init();
 
 
   // print_grid_node(grid->nodes[dim_x-1][dim_y-1][dim_z-1]);
@@ -193,6 +201,7 @@ int main(void)
   }
 
   Shader baseshader("../src/shaders/camera.vs", "../src/shaders/simple.fs");
+  snowsim->init(&camera, &baseshader);
 //  int num_particles = int(dim_x) * int(dim_y) * int(dim_z) + 1;
 //  MatrixXd vertices(num_particles, 3);
 //  int z = 0;
@@ -217,7 +226,6 @@ int main(void)
           0.5f,  0.5f, 0.0f,  // top right
           0.5f, -0.5f, 0.0f,  // bottom right
           -0.5f, -0.5f, 0.0f,  // bottom left
-          -0.5f,  0.5f, 0.9f   // top left
   };
 
   unsigned int VBO, VAO;
@@ -242,27 +250,12 @@ int main(void)
 
   while (!glfwWindowShouldClose(window))
     {
-      // per-frame time logic
-      // --------------------
-      float currentFrame = glfwGetTime();
-      deltaTime = currentFrame - lastFrame;
-      lastFrame = currentFrame;
-
-      processInput(window);
+      cameraInputTick();
 
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       baseshader.use();
-
-      // pass projection matrix to shader (note that in this case it could change every frame)
-      glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-      baseshader.setMat4("projection", projection);
-
-      // camera/view transformation
-      glm::mat4 view = camera.GetViewMatrix();
-      baseshader.setMat4("view", view);
-
 
       glBindVertexArray(VAO);
       glDrawArrays(GL_TRIANGLES, 0, 4);
