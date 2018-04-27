@@ -20,8 +20,12 @@ struct GridNode {
 struct Grid {
 
   vector<vector<vector<GridNode *> > > nodes;
+  int dim_x, dim_y, dim_z;
   float h;
 	Grid(int dim_x, int dim_y, int dim_z, float grid_h): h(grid_h) {
+    this->dim_x = dim_x;
+    this->dim_y = dim_y;
+    this->dim_z = dim_z;
 		nodes = vector<vector<vector<GridNode *> > >(dim_x);
 		for (int i = 0; i < dim_x; ++i) {
 			nodes[i] = vector<vector<GridNode *> >(dim_y);

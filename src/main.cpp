@@ -18,7 +18,7 @@
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 7.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -174,9 +174,9 @@ int main(void)
   // print_grid_node(grid->nodes[dim_x-1][dim_y-1][dim_z-1]);
 
   // Put a test particle
-  Particle* a_particle = new Particle(glm::vec3(4.5, 5.5, 6.5), 10);
-  a_particle->velocity = glm::vec3(1.0, 2.0, 3.0);
-  grid->nodes[4][5][6]->particles.push_back(a_particle);
+//  Particle* a_particle = new Particle(glm::vec3(4.5, 5.5, 6.5), 10);
+//  a_particle->velocity = glm::vec3(1.0, 2.0, 3.0);
+//  grid->nodes[4][5][6]->particles.push_back(a_particle);
   // cout << grid->nodes.size() << " " << grid->nodes[0].size() << " " << grid->nodes[0][0].size() << "\n";
   // cout << grid->nodes[4][5][6]->particles.size() << "\n";
   // cout << grid->nodes[4][5][7]->particles.size() << "\n";
@@ -193,7 +193,7 @@ int main(void)
   for (int i = 0; i < grid->nodes.size(); ++i) {
     for (int j = 0; j < grid->nodes[i].size(); ++j) {
       for (int k = 0; k < grid->nodes[i][j].size(); ++k) {
-        Particle* a_particle = new Particle(glm::vec3(float(i)/dim_x, float(j)/dim_y, float(k)/dim_z), 10);
+        Particle* a_particle = new Particle(glm::vec3(float(i) + 0.5, float(j) + 0.5, float(k) + 0.5), 10);
         a_particle->velocity = glm::vec3(1.0, 2.0, 3.0);
         grid->nodes[i][j][k]->particles.push_back(a_particle);
       }
@@ -228,24 +228,6 @@ int main(void)
           -0.5f, -0.5f, 0.0f,  // bottom left
   };
 
-  unsigned int VBO, VAO;
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &VBO);
-  // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-  glBindVertexArray(VAO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
-
-  // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-  // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-//  glBindVertexArray(0);
 
 
   while (!glfwWindowShouldClose(window))
@@ -255,13 +237,7 @@ int main(void)
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      baseshader.use();
-
-      glBindVertexArray(VAO);
-      glDrawArrays(GL_TRIANGLES, 0, 4);
       snowsim->drawContents();
-
-
 
       glfwPollEvents();
 

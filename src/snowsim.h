@@ -60,7 +60,8 @@ private:
   vector<CollisionObject *> *collision_objects;
 
   Shader *shader;
-
+  unsigned int grid_VAO, grid_VBO;
+  unsigned int particle_VAO, particle_VBO;
 
   const unsigned int SCR_WIDTH = 800;
   const unsigned int SCR_HEIGHT = 600;

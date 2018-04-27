@@ -13,6 +13,7 @@
 #include "collision/plane.h"
 #include "collision/sphere.h"
 //#include "misc/camera_info.h"
+#include "glm/ext.hpp"
 
 using namespace std;
 
@@ -47,6 +48,92 @@ void SnowSimulator::loadCollisionObjects(vector<CollisionObject *> *objects) { t
 void SnowSimulator::init(Camera *camera, Shader *shader) {
   this->camera = camera;
   this->shader = shader;
+  int x = grid->dim_x;
+  int y = grid->dim_y;
+  int z = grid->dim_z;
+
+  int num_lines = (z + 1) * ((x + 1) + (y + 1)) + ((x + 1) * (y+1));
+  int num_vertices = num_lines * 2;
+  float grid_vertices[num_vertices * 3];
+  memset(grid_vertices, 0, num_vertices * 3 * sizeof(float));
+  int t = 0;
+  for (int z_coord = 0; z_coord <= z; ++z_coord) {
+    for (int x_coord = 0; x_coord <= x; ++x_coord) {
+      // lines from y=0 to y=dim_y at z=0
+      glm::vec3 bottom(float(x_coord), 0.0f, float(z_coord));
+      glm::vec3 top(float(x_coord), grid->dim_y, float(z_coord));
+      grid_vertices[t + 0] = bottom.x;
+      grid_vertices[t + 1] = bottom.y;
+      grid_vertices[t + 2] = bottom.z;
+      grid_vertices[t + 3] = top.x;
+      grid_vertices[t + 4] = top.y;
+      grid_vertices[t + 5] = top.z;
+
+      t += 6;
+    }
+
+    for (int y_coord = 0; y_coord <= y; ++y_coord) {
+      // lines from x=0 to x=dim_z at z=0
+      glm::vec3 bottom(0.0f, float(y_coord), float(z_coord));
+      glm::vec3 top(grid->dim_x, float(y_coord), float(z_coord));
+      grid_vertices[t + 0] = bottom.x;
+      grid_vertices[t + 1] = bottom.y;
+      grid_vertices[t + 2] = bottom.z;
+      grid_vertices[t + 3] = top.x;
+      grid_vertices[t + 4] = top.y;
+      grid_vertices[t + 5] = top.z;
+
+      t += 6;
+    }
+  }
+  for (int x_coord = 0; x_coord <= x; ++x_coord) {
+    for (int y_coord = 0; y_coord <= y; ++y_coord) {
+      // lines from x=0 to x=dim_z at z=0
+      glm::vec3 front(float(x_coord), float(y_coord), 0.0);
+      glm::vec3 back(float(x_coord), float(y_coord), grid->dim_z);
+      grid_vertices[t + 0] = front.x;
+      grid_vertices[t + 1] = front.y;
+      grid_vertices[t + 2] = front.z;
+      grid_vertices[t + 3] = back.x;
+      grid_vertices[t + 4] = back.y;
+      grid_vertices[t + 5] = back.z;
+
+      t += 6;
+    }
+  }
+
+  glGenVertexArrays(1, &grid_VAO);
+  glGenBuffers(1, &grid_VBO);
+
+  glBindVertexArray(grid_VAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, grid_VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(grid_vertices), grid_vertices, GL_STATIC_DRAW);
+
+  // position attribute
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+
+  GLfloat cube_vertices[] = {
+          -0.05, -0.05, -0.05,   -0.05, -0.05,  0.05,   -0.05,  0.05,  0.05,   -0.05,  0.05, -0.05,
+          0.05, -0.05, -0.05,    0.05, -0.05,  0.05,    0.05,  0.05,  0.05,    0.05,  0.05, -0.05,
+          -0.05, -0.05, -0.05,   -0.05, -0.05,  0.05,    0.05, -0.05,  0.05,    0.05, -0.05, -0.05,
+          -0.05,  0.05, -0.05,   -0.05,  0.05,  0.05,    0.05,  0.05,  0.05,    0.05,  0.05, -0.05,
+          -0.05, -0.05, -0.05,   -0.05,  0.05, -0.05,    0.05,  0.05, -0.05,    0.05, -0.05, -0.05,
+          -0.05, -0.05,  0.05,   -0.05,  0.05,  0.05,    0.05,  0.05,  0.05,    0.05, -0.05,  0.05
+  };
+
+  glGenVertexArrays(1, &particle_VAO);
+  glGenBuffers(1, &particle_VBO);
+  // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+  glBindVertexArray(particle_VAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, particle_VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+
 
   // Initialize GUI
 //  initGUI(screen);
@@ -94,13 +181,6 @@ void SnowSimulator::init(Camera *camera, Shader *shader) {
 
 
 void SnowSimulator::drawContents() {
-  // pass projection matrix to shader (note that in this case it could change every frame)
-  glm::mat4 projection = glm::perspective(glm::radians(camera->Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-  shader->setMat4("projection", projection);
-
-  // camera/view transformation
-  glm::mat4 view = camera->GetViewMatrix();
-  shader->setMat4("view", view);
 
   // TODO
   glEnable(GL_DEPTH_TEST);
@@ -112,36 +192,17 @@ void SnowSimulator::drawContents() {
 //      grid->simulate(frames_per_sec, simulation_steps, external_accelerations, collision_objects);
     }
   }
-//
-//  // Bind the active shader
-//
-//  GLShader shader = shaders[activeShader];
-//  shader.bind();
-//
-//  // Prepare the camera projection matrix
-//
-//  Matrix4f model;
-//  model.setIdentity();
-//
-//  Matrix4f view = getViewMatrix();
-//  Matrix4f projection = getProjectionMatrix();
-//
-//  Matrix4f viewProjection = projection * view;
-//
-//  shader.setUniform("model", model);
-//  shader.setUniform("viewProjection", viewProjection);
-//
-//  switch (activeShader) {
-//    case WIREFRAME:
-//      drawWireframe(shader);
-//      break;
-//    case NORMALS:
-//      drawNormals(shader);
-//      break;
-//    case PHONG:
-//      drawPhong(shader);
-//      break;
-//  }
+
+  shader->use();
+  // pass projection matrix to shader (note that in this case it could change every frame)
+  glm::mat4 projection = glm::perspective(glm::radians(camera->Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+  shader->setMat4("projection", projection);
+
+  // camera/view transformation
+  glm::mat4 view = camera->GetViewMatrix();
+  shader->setMat4("view", view);
+  drawGrid();
+  drawParticles();
 //
 //  for (CollisionObject *co : *collision_objects) {
 //    co->render(shader);
@@ -149,10 +210,35 @@ void SnowSimulator::drawContents() {
 }
 
 void SnowSimulator::drawGrid() {
+  glBindVertexArray(grid_VAO);
+  glm::mat4 model;
+  model = glm::translate(model, glm::vec3(-float(grid->dim_x)/2, -float(grid->dim_y)/2, -float(grid->dim_z)/2));
+  shader->setMat4("model", model);
+  int num_vertices = (grid->dim_x + 1) * (grid->dim_y + 1) * (grid->dim_z + 1) * 2;
+
+  glDrawArrays(GL_LINES, 0, num_vertices * 3);
 }
 
 void SnowSimulator::drawParticles() {
-
+  vector<Particle *> all_particles;
+  for (int i = 0; i < grid->nodes.size(); ++i) {
+    for (int j = 0; j < grid->nodes[i].size(); ++j) {
+      for (int k = 0; k < grid->nodes[i][j].size(); ++k) {
+        for (Particle *particle : grid->nodes[i][j][k]->particles) {
+          all_particles.push_back(particle);
+        }
+      }
+    }
+  }
+  for(Particle* particle : all_particles) {
+    glm::mat4 model;
+    model = glm::translate(model, particle->position);
+    model = glm::translate(model, glm::vec3(-float(grid->dim_x) / 2, -float(grid->dim_y) / 2, -float(grid->dim_z) / 2));
+//    model = glm::rotate(model, glm::radians(rotation), glm::vec3(1.0f, 0.3f, 0.5f));
+    shader->setMat4("model", model);
+    glBindVertexArray(particle_VAO);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 24);
+  }
 
 }
 // ----------------------------------------------------------------------------
