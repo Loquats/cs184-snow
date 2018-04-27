@@ -15,8 +15,8 @@
 #include "snowsim.h"
 #include "shader.h"
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_HEIGHT = 1200;
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 7.0f));
 float lastX = SCR_WIDTH / 2.0f;
@@ -101,7 +101,7 @@ void loadOpenGl() {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 
-  window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
+  window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Simple example", NULL, NULL);
   if (!window)
   {
     glfwTerminate();
@@ -200,7 +200,7 @@ int main(void)
     }
   }
 
-  Shader baseshader("../src/shaders/camera.vs", "../src/shaders/simple.fs");
+  Shader baseshader("../src/shaders/camera.vert", "../src/shaders/simple.frag");
   snowsim->init(&camera, &baseshader);
 //  int num_particles = int(dim_x) * int(dim_y) * int(dim_z) + 1;
 //  MatrixXd vertices(num_particles, 3);
