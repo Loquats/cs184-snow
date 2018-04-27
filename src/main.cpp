@@ -15,6 +15,10 @@
 #include "snowsim.h"
 #include "shader.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 // camera
@@ -140,6 +144,39 @@ void cameraInputTick() {
   processInput(window);
 }
 
+void drawCube() {
+  GLfloat cube_vertices[] = {
+    -0.05, -0.05, -0.05,   -0.05, -0.05,  0.05,   -0.05,  0.05,  0.05,   -0.05,  0.05, -0.05,
+     0.05, -0.05, -0.05,    0.05, -0.05,  0.05,    0.05,  0.05,  0.05,    0.05,  0.05, -0.05,
+    -0.05, -0.05, -0.05,   -0.05, -0.05,  0.05,    0.05, -0.05,  0.05,    0.05, -0.05, -0.05,
+    -0.05,  0.05, -0.05,   -0.05,  0.05,  0.05,    0.05,  0.05,  0.05,    0.05,  0.05, -0.05,
+    -0.05, -0.05, -0.05,   -0.05,  0.05, -0.05,    0.05,  0.05, -0.05,    0.05, -0.05, -0.05,
+    -0.05, -0.05,  0.05,   -0.05,  0.05,  0.05,    0.05,  0.05,  0.05,    0.05, -0.05,  0.05
+  };
+
+  unsigned int VBO, VAO;
+  glGenVertexArrays(1, &VAO);
+  glGenBuffers(1, &VBO);
+  // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+  glBindVertexArray(VAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+
+  // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
+  // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
+//  glBindVertexArray(0);
+
+  glBindVertexArray(VAO);
+  glDrawArrays(GL_TRIANGLE_FAN, 0, 24);
+}
+
 int main(void)
 {
 
@@ -157,12 +194,9 @@ int main(void)
 
   glGetError(); // pull and ignore unhandled errors like GL_INVALID_ENUM
 
-  // test_particle();
-  // test_grid_node();
-
-  size_t dim_x = 10;
-  size_t dim_y = 11;
-  size_t dim_z = 12;
+  size_t dim_x = 3;
+  size_t dim_y = 4;
+  size_t dim_z = 5;
   Grid* grid = new Grid(dim_x, dim_y, dim_z, 1.0);
 
   SnowSimulator *snowsim = new SnowSimulator();
@@ -174,12 +208,28 @@ int main(void)
   // print_grid_node(grid->nodes[dim_x-1][dim_y-1][dim_z-1]);
 
   // Put a test particle
-  Particle* a_particle = new Particle(glm::vec3(4.5, 5.5, 6.5), 10);
-  a_particle->velocity = glm::vec3(1.0, 2.0, 3.0);
-  grid->nodes[4][5][6]->particles.push_back(a_particle);
+  // Particle* a_particle = new Particle(glm::vec3(4.5, 5.5, 6.5), 10);
+  // a_particle->velocity = glm::vec3(1.0, 2.0, 3.0);
+  // grid->nodes[4][5][6]->particles.push_back(a_particle);
+
+  // Particle* b_particle = new Particle(glm::vec3(0.5, 0.5, 0.5), 10);
+  // b_particle->velocity = glm::vec3(0.0, 0.0, 0.0);
+  // grid->nodes[0][0][0]->particles.push_back(b_particle);
   // cout << grid->nodes.size() << " " << grid->nodes[0].size() << " " << grid->nodes[0][0].size() << "\n";
   // cout << grid->nodes[4][5][6]->particles.size() << "\n";
   // cout << grid->nodes[4][5][7]->particles.size() << "\n";
+
+  vector<Particle *> all_particles;
+  for (int i = 0; i < grid->nodes.size(); ++i) {
+    for (int j = 0; j < grid->nodes[i].size(); ++j) {
+      for (int k = 0; k < grid->nodes[i][j].size(); ++k) {
+        Particle* a_particle = new Particle(glm::vec3(float(i) + 0.5, float(j) + 0.5, float(k) + 0.5), 10);
+        a_particle->velocity = glm::vec3(1.0, 2.0, 3.0);
+        grid->nodes[i][j][k]->particles.push_back(a_particle);
+        all_particles.push_back(a_particle);
+      }
+    }
+  }
 
   float delta_t = 0.0001; // todo: move these constants elsewhere
   float mu_0 = 1.0;
@@ -189,16 +239,6 @@ int main(void)
   compute_particle_volumes(grid);
   compute_F_hat_Ep(grid, delta_t);
   compute_grid_forces(grid, mu_0, lambda_0, xi);
-
-  for (int i = 0; i < grid->nodes.size(); ++i) {
-    for (int j = 0; j < grid->nodes[i].size(); ++j) {
-      for (int k = 0; k < grid->nodes[i][j].size(); ++k) {
-        Particle* a_particle = new Particle(glm::vec3(float(i)/dim_x, float(j)/dim_y, float(k)/dim_z), 10);
-        a_particle->velocity = glm::vec3(1.0, 2.0, 3.0);
-        grid->nodes[i][j][k]->particles.push_back(a_particle);
-      }
-    }
-  }
 
   Shader baseshader("../src/shaders/camera.vs", "../src/shaders/simple.fs");
   snowsim->init(&camera, &baseshader);
@@ -222,31 +262,20 @@ int main(void)
 //
 //  cout << vertices;
 
-  float vertices[] = {
-          0.5f,  0.5f, 0.0f,  // top right
-          0.5f, -0.5f, 0.0f,  // bottom right
-          -0.5f, -0.5f, 0.0f,  // bottom left
+  float rotation = 0;
+
+  glm::vec3 cubePositions[] = {
+    glm::vec3( 0.0f,  0.0f,  0.0f), 
+    glm::vec3( 2.0f,  5.0f, -15.0f), 
+    glm::vec3(-1.5f, -2.2f, -2.5f),  
+    glm::vec3(-3.8f, -2.0f, -12.3f),  
+    glm::vec3( 2.4f, -0.4f, -3.5f),  
+    glm::vec3(-1.7f,  3.0f, -7.5f),  
+    glm::vec3( 1.3f, -2.0f, -2.5f),  
+    glm::vec3( 1.5f,  2.0f, -2.5f), 
+    glm::vec3( 1.5f,  0.2f, -1.5f), 
+    glm::vec3(-1.3f,  1.0f, -1.5f)  
   };
-
-  unsigned int VBO, VAO;
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &VBO);
-  // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-  glBindVertexArray(VAO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
-
-  // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-  // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-//  glBindVertexArray(0);
-
 
   while (!glfwWindowShouldClose(window))
     {
@@ -257,16 +286,26 @@ int main(void)
 
       baseshader.use();
 
-      glBindVertexArray(VAO);
-      glDrawArrays(GL_TRIANGLES, 0, 4);
+      // glm::mat4 model;
+      // model = glm::rotate(model, glm::radians(rotation), glm::vec3(1.0f, 0.0f, 0.0f)); 
+      // int modelLoc = glGetUniformLocation(baseshader.ID, "model");
+      // glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+      for(Particle* particle : all_particles) {
+        glm::mat4 model;
+        model = glm::translate(model, particle->position);
+        model = glm::translate(model, glm::vec3(-float(dim_x)/2, -float(dim_y)/2, -float(dim_z)));
+        model = glm::rotate(model, glm::radians(rotation), glm::vec3(1.0f, 0.3f, 0.5f));
+        baseshader.setMat4("model", model);
+
+        drawCube();
+      }
       snowsim->drawContents();
-
-
 
       glfwPollEvents();
 
       glfwSwapBuffers(window);
-
+      rotation += 1;
     }
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
