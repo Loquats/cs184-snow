@@ -3,16 +3,12 @@
 #include <cmath>
 #include <glad/glad.h>
 
-//#include <CGL/vector3D.h>
-//#include <nanogui/nanogui.h>
-
 #include "snowsim.h"
 
 #include "camera.h"
 #include "grid.h"
 #include "collision/plane.h"
 #include "collision/sphere.h"
-//#include "misc/camera_info.h"
 #include "glm/ext.hpp"
 
 using namespace std;

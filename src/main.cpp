@@ -16,6 +16,7 @@
 #include "shader.h"
 #include "collision/collisionObject.h"
 #include "collision/plane.h"
+#include "misc/sampling.h"
 
 const unsigned int SCR_WIDTH = 1600;
 const unsigned int SCR_HEIGHT = 1200;
@@ -161,9 +162,6 @@ int main(void)
 
   glGetError(); // pull and ignore unhandled errors like GL_INVALID_ENUM
 
-  // test_particle();
-  // test_grid_node();
-
   size_t dim_x = 4;
   size_t dim_y = 5;
   size_t dim_z = 6;
@@ -178,57 +176,13 @@ int main(void)
   //todo define object schemas and shit and find way to load
   snowsim->loadCollisionObjects(objects);
 
-
-  // print_grid_node(grid->nodes[dim_x-1][dim_y-1][dim_z-1]);
-
-  // Put a test particle
-//  Particle* a_particle = new Particle(glm::vec3(4.5, 5.5, 6.5), 10);
-//  a_particle->velocity = glm::vec3(1.0, 2.0, 3.0);
-//  grid->nodes[4][5][6]->particles.push_back(a_particle);
-  // cout << grid->nodes.size() << " " << grid->nodes[0].size() << " " << grid->nodes[0][0].size() << "\n";
-  // cout << grid->nodes[4][5][6]->particles.size() << "\n";
-  // cout << grid->nodes[4][5][7]->particles.size() << "\n";
-
-  for (int i = 0; i < grid->dim_x; ++i) {
-    for (int j = 0; j < grid->dim_y; ++j) {
-      for (int k = 0; k < grid->dim_z; ++k) {
-        Particle* a_particle = new Particle(glm::vec3(float(i) + 0.5, float(j) + 0.5, float(k) + 0.5), 10);
-        a_particle->velocity = glm::vec3(0.0, 0.0, 0.0);
-        grid->all_particles.push_back(a_particle);
-        grid->resetGrid();
-      }
-    }
-  }
+//  createOneToOneParticles(grid);
+  int num_particles = 100;
+  float radius = 2.0;
+  createSphereUniformParticles(grid, num_particles, radius);
 
   Shader baseshader("../src/shaders/camera.vert", "../src/shaders/simple.frag");
   snowsim->init(&camera, &baseshader);
-//  int num_particles = int(dim_x) * int(dim_y) * int(dim_z) + 1;
-//  MatrixXd vertices(num_particles, 3);
-//  int z = 0;
-//  for (int i = 0; i < grid->nodes.size(); ++i) {
-//    for (int j = 0; j < grid->nodes[i].size(); ++j) {
-//      for (int k = 0; k < grid->nodes[i][j].size(); ++k) {
-//        // cout << grid->nodes[4][5][6]->particles.size() << " grid " << i << " " << j << " " << k << " " << grid->nodes[i][j][k]->particles.size() << "\n";
-//        for (Particle *particle : grid->nodes[i][j][k]->particles) {  // key location
-//          glm::vec3 pos = particle->position;
-//          vertices(z,0) = pos.x;
-//          vertices(z,1) = pos.y;
-//          vertices(z,2) = pos.z;
-//          z += 1;
-//        }
-//      }
-//    }
-//  }
-//
-//  cout << vertices;
-
-  float vertices[] = {
-          0.5f,  0.5f, 0.0f,  // top right
-          0.5f, -0.5f, 0.0f,  // bottom right
-          -0.5f, -0.5f, 0.0f,  // bottom left
-  };
-
-
 
   while (!glfwWindowShouldClose(window))
     {
@@ -237,7 +191,6 @@ int main(void)
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      float delta_t = 0.01;
       snowsim->drawContents();
 
       glfwPollEvents();
