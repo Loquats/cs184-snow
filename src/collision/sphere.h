@@ -13,7 +13,7 @@ public:
         friction(friction) {}
 
   void render();
-  void collide();
+  vec3 collide(vec3 position, vec3 next_position, vec3 velocity);
 
 private:
   vec3 origin;

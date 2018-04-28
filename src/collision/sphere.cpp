@@ -5,8 +5,9 @@
 
 using namespace glm;
 
-void Sphere::collide() {
+vec3 Sphere::collide(vec3 position, vec3 next_position, vec3 velocity) {
   //todo
+    return vec3(0.0);
 }
 
 void Sphere::render() {

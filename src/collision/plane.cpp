@@ -1,10 +1,20 @@
 
+#include <glm/vec3.hpp>
+#include "../particle.h"
+#include "../grid.h"
 #include "plane.h"
 
 #define SURFACE_OFFSET 0.0001
+using namespace glm;
 
-void Plane::collide() {
-  // TODO
+vec3 Plane::collide(vec3 position, vec3 next_position, vec3 velocity) {
+    float test = dot(position - point, normal);
+    float test_next = dot(next_position - point, normal);
+    if (test * test_next < 0) { // the particle crosses over
+        return vec3(0.0); // we want the particle to stop
+    } else {
+        return velocity;
+    }
 }
 
 void Plane::render() {

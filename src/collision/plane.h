@@ -4,6 +4,7 @@
 
 #include <glm/vec3.hpp>
 #include <glm/gtx/norm.hpp>
+#include "../particle.h"
 #include "collisionObject.h"
 
 using namespace glm;
@@ -14,12 +15,14 @@ public:
       : point(point), normal(normal / l2Norm(normal)), friction(friction) {}
 
   void render();
-  void collide();
+  vec3 collide(vec3 position, vec3 next_position, vec3 velocity);
 
   vec3 point;
   vec3 normal;
 
   double friction;
+private:
+
 };
 
 #endif /* COLLISIONOBJECT_PLANE_H */
