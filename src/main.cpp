@@ -18,6 +18,7 @@
 #include "collision/plane.h"
 #include "misc/sampling.h"
 
+
 const unsigned int SCR_WIDTH = 1600;
 const unsigned int SCR_HEIGHT = 1200;
 // camera
@@ -170,19 +171,22 @@ int main(void)
   snowsim = new SnowSimulator();
   snowsim->loadGrid(grid);
 
-  Plane* plane = new Plane(vec3(0.0), vec3(0.0,1.0,0.0), 1.0);
-  vector<CollisionObject *> *objects = new vector<CollisionObject *>();
-  objects->push_back(plane);
   //todo define object schemas and shit and find way to load
-  snowsim->loadCollisionObjects(objects);
-
-//  createOneToOneParticles(grid);
   int num_particles = 100;
   float radius = 2.0;
   createSphereUniformParticles(grid, num_particles, radius);
+  vector<CollisionObject *> objects;
 
   Shader baseshader("../src/shaders/camera.vert", "../src/shaders/simple.frag");
+  vec3 point(0.0f, 0.0f, 0.0f);
+  vec3 normal(0.0f, 1.0f, 0.0f);
+  Plane *p = new Plane(point, normal, vec3(dim_x, dim_y, dim_z));
+  objects.push_back(p);
+  glm::vec4 hot_pink(1.0f, 0.5f, 1.0f, 1.0f);
+  baseshader.use();
+  baseshader.setVec4("in_color", hot_pink);
   snowsim->init(&camera, &baseshader);
+  snowsim->loadCollisionObjects(&objects);
 
   while (!glfwWindowShouldClose(window))
     {

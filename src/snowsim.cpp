@@ -201,10 +201,10 @@ void SnowSimulator::drawContents() {
   shader->setMat4("view", view);
   drawGrid();
   drawParticles();
-//
-//  for (CollisionObject *co : *collision_objects) {
-//    co->render(shader);
-//  }
+
+  for (CollisionObject *co : *collision_objects) {
+    co->render(shader);
+  }
 }
 
 void SnowSimulator::drawGrid() {
