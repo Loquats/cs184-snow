@@ -14,6 +14,7 @@
 #include "camera.h"
 #include "snowsim.h"
 #include "shader.h"
+#include "collision/plane.h"
 
 const unsigned int SCR_WIDTH = 1600;
 const unsigned int SCR_HEIGHT = 1200;
@@ -199,9 +200,19 @@ int main(void)
       }
     }
   }
+  vec3 point(0.0f,0.0f,0.0f);
+  vec3 normal(0.0f, 1.0f, 0.0f);
+
+  vector<CollisionObject *> objects;
 
   Shader baseshader("../src/shaders/camera.vert", "../src/shaders/simple.frag");
+  Plane *p = new Plane(point, normal);
+  objects.push_back(p);
+  glm::vec4 hot_pink(1.0f, 0.5f, 1.0f, 1.0f);
+  baseshader.use();
+  baseshader.setVec4("in_color", hot_pink);
   snowsim->init(&camera, &baseshader);
+  snowsim->loadCollisionObjects(&objects);
 //  int num_particles = int(dim_x) * int(dim_y) * int(dim_z) + 1;
 //  MatrixXd vertices(num_particles, 3);
 //  int z = 0;

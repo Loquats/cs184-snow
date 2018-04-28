@@ -201,12 +201,12 @@ void SnowSimulator::drawContents() {
   // camera/view transformation
   glm::mat4 view = camera->GetViewMatrix();
   shader->setMat4("view", view);
-  drawGrid();
-  drawParticles();
-//
-//  for (CollisionObject *co : *collision_objects) {
-//    co->render(shader);
-//  }
+//  drawGrid();
+//  drawParticles();
+
+  for (CollisionObject *co : *collision_objects) {
+    co->render(shader);
+  }
 }
 
 void SnowSimulator::drawGrid() {

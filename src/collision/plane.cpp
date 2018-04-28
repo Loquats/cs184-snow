@@ -1,41 +1,28 @@
 
 #include "plane.h"
+#include <Eigen/Dense>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/ext.hpp>
 
 #define SURFACE_OFFSET 0.0001
+
+using namespace Eigen;
 
 void Plane::collide() {
   // TODO
 }
 
-void Plane::render() {
+void Plane::render(Shader *shader) {
   //TODO
-//  nanogui::Color color(0.7f, 0.7f, 0.7f, 1.0f);
-//
-//  Vector3f sPoint(point.x, point.y, point.z);
-//  Vector3f sNormal(normal.x, normal.y, normal.z);
-//  Vector3f sParallel(normal.y - normal.z, normal.z - normal.x,
-//                     normal.x - normal.y);
-//  sParallel.normalize();
-//  Vector3f sCross = sNormal.cross(sParallel);
-//
-//  MatrixXf positions(3, 4);
-//  MatrixXf normals(3, 4);
-//
-//  positions.col(0) << sPoint + 2 * (sCross + sParallel);
-//  positions.col(1) << sPoint + 2 * (sCross - sParallel);
-//  positions.col(2) << sPoint + 2 * (-sCross + sParallel);
-//  positions.col(3) << sPoint + 2 * (-sCross - sParallel);
-//
-//  normals.col(0) << sNormal;
-//  normals.col(1) << sNormal;
-//  normals.col(2) << sNormal;
-//  normals.col(3) << sNormal;
-//
-//  if (shader.uniform("in_color", false) != -1) {
-//    shader.setUniform("in_color", color);
-//  }
-//  shader.uploadAttrib("in_position", positions);
-//  shader.uploadAttrib("in_normal", normals);
-//
-//  shader.drawArray(GL_TRIANGLE_STRIP, 0, 4);
+  vec4 color(0.7f, 0.7f, 0.7f, 1.0f);
+  glBindVertexArray(plane_VAO);
+  shader->use();
+  shader->setVec4("in_color", color);
+
+
+  glm::mat4 model(1.0f);
+  std::cout<<glm::to_string(model)<<std::endl;
+  shader->setMat4("model", model);
+
+  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
