@@ -47,11 +47,6 @@ public:
     plane_vertices[10] = p4.y;
     plane_vertices[11] = p4.z;
 
-//    plane_vertices[0] = *glm::value_ptr(p1);
-//    plane_vertices[3] = *glm::value_ptr(p2);
-//    plane_vertices[6] = *glm::value_ptr(p3);
-//    plane_vertices[9] = *glm::value_ptr(p4);
-
     glGenVertexArrays(1, &plane_VAO);
     glGenBuffers(1, &plane_VBO);
 
@@ -61,7 +56,7 @@ public:
     glBufferData(GL_ARRAY_BUFFER, sizeof(plane_vertices), plane_vertices, GL_STATIC_DRAW);
 
     // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 1 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
   }

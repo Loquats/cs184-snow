@@ -15,14 +15,13 @@ void Plane::collide() {
 void Plane::render(Shader *shader) {
   //TODO
   vec4 color(0.7f, 0.7f, 0.7f, 1.0f);
-  glBindVertexArray(plane_VAO);
+
   shader->use();
   shader->setVec4("in_color", color);
-
 
   glm::mat4 model(1.0f);
   std::cout<<glm::to_string(model)<<std::endl;
   shader->setMat4("model", model);
-
+  glBindVertexArray(plane_VAO);
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
