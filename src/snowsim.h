@@ -52,6 +52,7 @@ private:
   //todo we probably need to fuck with this
   int frames_per_sec = 60;
   int simulation_steps = 30;
+  float delta_t = 1e-5;
 
   glm::vec3 gravity = glm::vec3(0.0f, -9.8f, 0.0f);
 

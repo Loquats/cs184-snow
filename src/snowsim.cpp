@@ -187,11 +187,13 @@ void SnowSimulator::drawContents() {
 
   if (!is_paused) {
     vector<vec3> external_accelerations = {gravity};
-
-    for (int i = 0; i < simulation_steps; i++) {
-//      grid->simulate(frames_per_sec, simulation_steps, external_accelerations, collision_objects);
-    }
+    float frame_time = 1. / frames_per_sec;
+    int simulation_steps = 200;//std::round(frame_time / delta_t);
+//    float test_delta_t = 0.0001; // for testing
+    for (int i = 0; i < simulation_steps; i++)
+      grid->simulate(delta_t, external_accelerations, collision_objects);
   }
+
 
   shader->use();
   // pass projection matrix to shader (note that in this case it could change every frame)
@@ -220,16 +222,8 @@ void SnowSimulator::drawGrid() {
 }
 
 void SnowSimulator::drawParticles() {
-  vector<Particle *> all_particles;
-  for (int i = 0; i < grid->nodes.size(); ++i) {
-    for (int j = 0; j < grid->nodes[i].size(); ++j) {
-      for (int k = 0; k < grid->nodes[i][j].size(); ++k) {
-        for (Particle *particle : grid->nodes[i][j][k]->particles) {
-          all_particles.push_back(particle);
-        }
-      }
-    }
-  }
+  vector<Particle *>& all_particles = grid->all_particles;
+
   for(Particle* particle : all_particles) {
     glm::mat4 model;
     model = glm::translate(model, particle->position);
@@ -241,6 +235,7 @@ void SnowSimulator::drawParticles() {
   }
 
 }
+
 // ----------------------------------------------------------------------------
 // CAMERA CALCULATIONS
 //

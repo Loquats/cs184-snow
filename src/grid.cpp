@@ -38,27 +38,47 @@ void Grid::simulate(float delta_t, vector<vec3> external_accelerations, vector<C
     float theta_s = 0.1;
     float alpha = 0.95;
 
-    resetGrid();
-    particle_to_grid();
-    compute_particle_volumes();
-    compute_F_hat_Ep(delta_t);
-    compute_grid_forces(mu_0, lambda_0, xi);
-    apply_ext_accelerations(external_accelerations);
-    compute_grid_velocities(delta_t, collision_objects);
-    compute_time_integration();
-    update_deformation_gradients(theta_c, theta_s, delta_t);
-    update_particle_velocities(alpha);
-    compute_particle_collisions(delta_t, collision_objects);
+    vec3 total_acc = vec3(0.0);
+    for (vec3 acc : external_accelerations) {
+      total_acc += acc;
+    }
 
+//    resetGrid();
+//    particle_to_grid();
+//    compute_particle_volumes();
+//    compute_F_hat_Ep(delta_t);
+//    compute_grid_forces(mu_0, lambda_0, xi);
+//    apply_ext_accelerations(external_accelerations);
+//    compute_grid_velocities(delta_t, collision_objects);
+//    compute_time_integration();
+//    update_deformation_gradients(theta_c, theta_s, delta_t);
+//    update_particle_velocities(alpha);
+
+
+    // the code below could get wrapped up in a method, i just didn't bother since it's sorta in test still
+    // also kinda unsure of whether we're supposed to apply accelerations on the grid or the particles
     for (int i = 0; i < dim_x; ++i) {
         for (int j = 0; j < dim_y; ++j) {
             for (int k = 0; k < dim_z; ++k) {
                 for (Particle* particle : nodes[i][j][k]->particles) {  // key location
-                    particle->position += particle->velocity * delta_t;
+                    particle->velocity += total_acc * delta_t;
                 }
             }
         }
     }
+
+    compute_particle_collisions(delta_t, collision_objects);
+
+    for (int i = 0; i < dim_x; ++i) {
+      for (int j = 0; j < dim_y; ++j) {
+        for (int k = 0; k < dim_z; ++k) {
+          for (Particle* particle : nodes[i][j][k]->particles) {  // key location
+            particle->position += particle->velocity * delta_t;
+          }
+        }
+      }
+    }
+
 }
 
 /*

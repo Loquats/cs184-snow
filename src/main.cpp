@@ -14,6 +14,8 @@
 #include "camera.h"
 #include "snowsim.h"
 #include "shader.h"
+#include "collision/collisionObject.h"
+#include "collision/plane.h"
 
 const unsigned int SCR_WIDTH = 1600;
 const unsigned int SCR_HEIGHT = 1200;
@@ -28,6 +30,8 @@ float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
 GLFWwindow *window = nullptr;
+
+SnowSimulator *snowsim;
 
 using namespace std;
 
@@ -160,15 +164,19 @@ int main(void)
   // test_particle();
   // test_grid_node();
 
-  size_t dim_x = 10;
-  size_t dim_y = 11;
-  size_t dim_z = 12;
+  size_t dim_x = 4;
+  size_t dim_y = 5;
+  size_t dim_z = 6;
   Grid* grid = new Grid(dim_x, dim_y, dim_z, 1.0);
 
-  SnowSimulator *snowsim = new SnowSimulator();
+  snowsim = new SnowSimulator();
   snowsim->loadGrid(grid);
+
+  Plane* plane = new Plane(vec3(0.0), vec3(0.0,1.0,0.0), 1.0);
+  vector<CollisionObject *> *objects = new vector<CollisionObject *>();
+  objects->push_back(plane);
   //todo define object schemas and shit and find way to load
-//  snowsim->loadCollisionObjects(&objects);
+  snowsim->loadCollisionObjects(objects);
 
 
   // print_grid_node(grid->nodes[dim_x-1][dim_y-1][dim_z-1]);
@@ -181,21 +189,13 @@ int main(void)
   // cout << grid->nodes[4][5][6]->particles.size() << "\n";
   // cout << grid->nodes[4][5][7]->particles.size() << "\n";
 
-  float delta_t = 0.0001; // todo: move these constants elsewhere
-  float mu_0 = 1.0;
-  float lambda_0 = 1.0;
-  float xi = 10;
-  particle_to_grid(grid);
-  compute_particle_volumes(grid);
-  compute_F_hat_Ep(grid, delta_t);
-  compute_grid_forces(grid, mu_0, lambda_0, xi);
-
-  for (int i = 0; i < grid->nodes.size(); ++i) {
-    for (int j = 0; j < grid->nodes[i].size(); ++j) {
-      for (int k = 0; k < grid->nodes[i][j].size(); ++k) {
+  for (int i = 0; i < grid->dim_x; ++i) {
+    for (int j = 0; j < grid->dim_y; ++j) {
+      for (int k = 0; k < grid->dim_z; ++k) {
         Particle* a_particle = new Particle(glm::vec3(float(i) + 0.5, float(j) + 0.5, float(k) + 0.5), 10);
-        a_particle->velocity = glm::vec3(1.0, 2.0, 3.0);
-        grid->nodes[i][j][k]->particles.push_back(a_particle);
+        a_particle->velocity = glm::vec3(0.0, 0.0, 0.0);
+        grid->all_particles.push_back(a_particle);
+        grid->resetGrid();
       }
     }
   }
@@ -237,6 +237,7 @@ int main(void)
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+      float delta_t = 0.01;
       snowsim->drawContents();
 
       glfwPollEvents();
