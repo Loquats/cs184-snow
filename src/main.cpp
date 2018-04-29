@@ -163,7 +163,8 @@ int main(void)
   size_t dim_x = 4;
   size_t dim_y = 5;
   size_t dim_z = 6;
-  Grid* grid = new Grid(dim_x, dim_y, dim_z, 1.0);
+  float h = 1.0;
+  Grid* grid = new Grid(dim_x, dim_y, dim_z, h);
 
   snowsim = new SnowSimulator();
   snowsim->loadGrid(grid);
@@ -175,7 +176,7 @@ int main(void)
   vector<CollisionObject *> objects;
 
   Shader baseshader("../src/shaders/camera.vert", "../src/shaders/simple.frag");
-  vec3 point(0.0f, 0.0f, 0.0f);
+  vec3 point(0.0f, -1.0f * dim_y * h / 2, 0.0f);
   vec3 normal(0.0f, 1.0f, 0.0f);
   Plane *p = new Plane(point, normal, vec3(dim_x, dim_y, dim_z));
   objects.push_back(p);
