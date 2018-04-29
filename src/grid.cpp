@@ -34,8 +34,8 @@ void Grid::simulate(float delta_t, vector<vec3> external_accelerations, vector<C
     float mu_0 = 1.0;
     float lambda_0 = 1.0;
     float xi = 10;
-    float theta_c = 0.1;
-    float theta_s = 0.1;
+    float theta_c = 2.5e-2;
+    float theta_s = 7.5e-3;
     float alpha = 0.95;
 
     vec3 total_acc = vec3(0.0);
@@ -43,9 +43,12 @@ void Grid::simulate(float delta_t, vector<vec3> external_accelerations, vector<C
       total_acc += acc;
     }
 
-//    resetGrid();
+    resetGrid();
 //    particle_to_grid();
-//    compute_particle_volumes();
+//    if (first_step) {
+//        compute_particle_volumes();
+//        first_step = false;
+//    }
 //    compute_F_hat_Ep(delta_t);
 //    compute_grid_forces(mu_0, lambda_0, xi);
 //    apply_ext_accelerations(external_accelerations);
@@ -53,7 +56,6 @@ void Grid::simulate(float delta_t, vector<vec3> external_accelerations, vector<C
 //    compute_time_integration();
 //    update_deformation_gradients(theta_c, theta_s, delta_t);
 //    update_particle_velocities(alpha);
-
 
     // the code below could get wrapped up in a method, i just didn't bother since it's sorta in test still
     // also kinda unsure of whether we're supposed to apply accelerations on the grid or the particles
@@ -89,7 +91,7 @@ void Grid::particle_to_grid() {
   for (int i = 0; i < dim_x; ++i) {
     for (int j = 0; j < dim_y; ++j) {
       for (int k = 0; k < dim_z; ++k) {
-        for (Particle* particle : nodes[i][j][k]->particles) {	// key location
+        for (Particle *particle : nodes[i][j][k]->particles) {    // key location
           vec3 pos = particle->position;
           int i_lo = std::max((int) ceil(pos.x / h - 2), 0);
           int i_hi = std::min((int) floor(pos.x / h + 2) + 1, (int) dim_x);
@@ -110,6 +112,26 @@ void Grid::particle_to_grid() {
       }
     }
   }
+
+
+//    for (Particle* particle : all_particles) {	// key location
+//      vec3 pos = particle->position;
+//      int i_lo = std::max((int) ceil(pos.x / h - 2), 0);
+//      int i_hi = std::min((int) floor(pos.x / h + 2) + 1, (int) dim_x);
+//      int j_lo = std::max((int) ceil(pos.y / h - 2), 0);
+//      int j_hi = std::min((int) floor(pos.y / h + 2) + 1, (int) dim_y);
+//      int k_lo = std::max((int) ceil(pos.z / h - 2), 0);
+//      int k_hi = std::min((int) floor(pos.z / h + 2) + 1, (int) dim_z);
+//      for (int dest_i = i_lo; dest_i < i_hi; ++dest_i) {
+//        for (int dest_j = j_lo; dest_j < j_hi; ++dest_j) {
+//          for (int dest_k = k_lo; dest_k < k_hi; ++dest_k) {
+//            float weight = b_spline(pos, vec3(dest_i, dest_j, dest_k), h);
+//            nodes[dest_i][dest_j][dest_k]->mass += weight * particle->mass;
+//            nodes[dest_i][dest_j][dest_k]->velocity += weight * particle->mass * particle->velocity;
+//          }
+//        }
+//      }
+//    }
 
   // Normalize grid velocity by its mass all at once
   for (int i = 0; i < dim_x; ++i) {

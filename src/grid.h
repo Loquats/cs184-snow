@@ -26,9 +26,10 @@ public:
   int dim_x, dim_y, dim_z;
   float h;
 	Grid(int dim_x, int dim_y, int dim_z, float grid_h): h(grid_h) {
-    this->dim_x = dim_x;
-    this->dim_y = dim_y;
-    this->dim_z = dim_z;
+        this->dim_x = dim_x;
+        this->dim_y = dim_y;
+        this->dim_z = dim_z;
+        first_step = true;
 		nodes = vector<vector<vector<GridNode *> > >(dim_x);
 		for (int i = 0; i < dim_x; ++i) {
 			nodes[i] = vector<vector<GridNode *> >(dim_y);
@@ -43,6 +44,7 @@ public:
 	};
     vector<vector<vector<GridNode *> > > nodes; // eventually should probably make this private
 	vector<Particle *> all_particles;
+	bool first_step;
 
 	void resetGrid();
 	void loadParticles(vector<Particle *> particles) { this->all_particles = particles; };
