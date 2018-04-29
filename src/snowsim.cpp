@@ -54,8 +54,7 @@ void SnowSimulator::init(Camera *camera, Shader *shader) {
   int t = 0;
   for (int z_coord = 0; z_coord <= z; ++z_coord) {
     for (int x_coord = 0; x_coord <= x; ++x_coord) {
-      // lines from y=0 to y=dim_y at z=0
-      glm::vec3 bottom(float(x_coord), 0.0f, float(z_coord));
+      glm::vec3 bottom(float(x_coord), 0, float(z_coord));
       glm::vec3 top(float(x_coord), grid->dim_y, float(z_coord));
       grid_vertices[t + 0] = bottom.x;
       grid_vertices[t + 1] = bottom.y;
@@ -130,48 +129,30 @@ void SnowSimulator::init(Camera *camera, Shader *shader) {
   glEnableVertexAttribArray(0);
 
 
-  // Initialize GUI
-//  initGUI(screen);
-//  screen->setSize(default_window_size);
 
-//  // Initialize camera
-//
-//  CGL::Collada::CameraInfo camera_info;
-//  camera_info.hFov = 50;
-//  camera_info.vFov = 35;
-//  camera_info.nClip = 0.01;
-//  camera_info.fClip = 10000;
-//
-//  // Try to intelligently figure out the camera target
-//
-//  Vector3D avg_pm_position(0, 0, 0);
-//
-//  for (auto &pm : cloth->point_masses) {
-//    avg_pm_position += pm.position / cloth->point_masses.size();
-//  }
-//
-//  CGL::Vector3D target(avg_pm_position.x, avg_pm_position.y / 2,
-//                       avg_pm_position.z);
-//  CGL::Vector3D c_dir(0., 0., 0.);
-//  canonical_view_distance = max(cloth->width, cloth->height) * 0.9;
-//  scroll_rate = canonical_view_distance / 10;
-//
-//  view_distance = canonical_view_distance * 2;
-//  min_view_distance = canonical_view_distance / 10.0;
-//  max_view_distance = canonical_view_distance * 20.0;
-//
-//  // canonicalCamera is a copy used for view resets
-//
-//  camera.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z), view_distance,
-//               min_view_distance, max_view_distance);
-//  canonicalCamera.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z),
-//                        view_distance, min_view_distance, max_view_distance);
-//
-//  screen_w = default_window_size(0);
-//  screen_h = default_window_size(1);
-//
-//  camera.configure(camera_info, screen_w, screen_h);
-//  canonicalCamera.configure(camera_info, screen_w, screen_h);
+  glGenVertexArrays(1, &grid_force_VAO);
+  glGenBuffers(1, &grid_force_VBO);
+
+  glBindVertexArray(grid_force_VAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, grid_force_VBO);
+//  glBufferData(GL_ARRAY_BUFFER, sizeof(grid_vertices), grid_vertices, GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+
+
+  glGenVertexArrays(1, &particle_velocity_VAO);
+  glGenBuffers(1, &particle_velocity_VBO);
+
+  glBindVertexArray(particle_velocity_VAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, particle_velocity_VBO);
+//  glBufferData(GL_ARRAY_BUFFER, sizeof(grid_vertices), grid_vertices, GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+
 }
 
 
@@ -200,7 +181,8 @@ void SnowSimulator::drawContents() {
   shader->setMat4("view", view);
   drawGrid();
   drawParticles();
-
+//  drawGridForces();
+  drawParticleForces();
   for (CollisionObject *co : *collision_objects) {
     co->render(shader);
   }
@@ -228,6 +210,84 @@ void SnowSimulator::drawParticles() {
     glBindVertexArray(particle_VAO);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 24);
   }
+
+}
+
+void SnowSimulator::drawGridForces() {
+
+  float ARROW_LENGTH_SCALAR = 2;
+  int num_arrows = grid->dim_x * grid->dim_y * grid->dim_z;
+  int num_vertices = num_arrows * 2;
+  float grid_force_vertices[num_vertices * 3];
+  memset(grid_force_vertices, 0, num_vertices * 3 * sizeof(float));
+
+  int counter = 0;
+  for (int i = 0; i < grid->dim_x; ++i) {
+    for (int j = 0; j < grid->dim_y; ++j) {
+      for (int k = 0; k < grid->dim_z; ++k) {
+        vec3* force = &grid->nodes[i][j][k]->force;
+        if (force->x == 0 and force->y == 0 and force->z == 0) {
+          continue;
+        }
+        vec3 center((i + 0.5) * grid->h, (j + 0.5) * grid->h, (k + 0.5) * grid->h);
+        grid_force_vertices[counter] = center.x;
+        grid_force_vertices[counter+1] = center.y;
+        grid_force_vertices[counter+2] = center.z;
+        counter += 3;
+        vec3 copied_force(*force);
+        copied_force *= ARROW_LENGTH_SCALAR;
+        grid_force_vertices[counter] = center.x + copied_force.x;
+        grid_force_vertices[counter+1] = center.y + copied_force.y;
+        grid_force_vertices[counter+2] = center.z + copied_force.z;
+        counter += 3;
+      }
+    }
+  }
+  shader->use();
+  mat4 model;
+  model = glm::translate(model, -glm::vec3(float(grid->dim_x) / 2, float(grid->dim_y) / 2, float(grid->dim_z) / 2));
+//    model = glm::rotate(model, glm::radians(rotation), glm::vec3(1.0f, 0.3f, 0.5f));
+  shader->setMat4("model", model);
+  glBindVertexArray(grid_force_VAO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(grid_force_vertices), grid_force_vertices, GL_DYNAMIC_DRAW);
+  glDrawArrays(GL_LINES, 0, num_vertices);
+
+}
+
+void SnowSimulator::drawParticleForces() {
+
+  float ARROW_LENGTH_SCALAR = 2;
+  int num_arrows = int(grid->all_particles.size());
+  int num_vertices = num_arrows * 2;
+  float particle_velocity_vertices[num_vertices * 3];
+  memset(particle_velocity_vertices, 0, num_vertices * 3 * sizeof(float));
+
+  int counter = 0;
+  for (Particle *p : grid->all_particles) {
+    vec3* velocity = &p->velocity;
+    if (velocity->x == 0 and velocity->y == 0 and velocity->z == 0) {
+      continue;
+    }
+    vec3 center(p->position);
+    particle_velocity_vertices[counter] = center.x;
+    particle_velocity_vertices[counter+1] = center.y;
+    particle_velocity_vertices[counter+2] = center.z;
+    counter += 3;
+    vec3 copied_velocity(*velocity);
+    copied_velocity *= ARROW_LENGTH_SCALAR;
+    particle_velocity_vertices[counter] = center.x + copied_velocity.x;
+    particle_velocity_vertices[counter+1] = center.y + copied_velocity.y;
+    particle_velocity_vertices[counter+2] = center.z + copied_velocity.z;
+    counter += 3;
+  }
+  shader->use();
+  mat4 model;
+  model = glm::translate(model, -glm::vec3(float(grid->dim_x) / 2, float(grid->dim_y) / 2, float(grid->dim_z) / 2));
+//    model = glm::rotate(model, glm::radians(rotation), glm::vec3(1.0f, 0.3f, 0.5f));
+  shader->setMat4("model", model);
+  glBindVertexArray(particle_velocity_VAO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(particle_velocity_vertices), particle_velocity_vertices, GL_DYNAMIC_DRAW);
+  glDrawArrays(GL_LINES, 0, num_vertices);
 
 }
 
