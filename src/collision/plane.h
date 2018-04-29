@@ -2,7 +2,6 @@
 #define COLLISIONOBJECT_PLANE_H
 
 
-#include <glm/vec3.hpp>
 #include <glm/gtx/norm.hpp>
 #include "../particle.h"
 #include <cstring>

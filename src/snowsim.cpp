@@ -9,7 +9,6 @@
 #include "grid.h"
 #include "collision/plane.h"
 #include "collision/sphere.h"
-#include "glm/ext.hpp"
 
 using namespace std;
 

@@ -1,12 +1,12 @@
 #include <algorithm>
 #include <iostream>
-#include <glm/ext.hpp>
 #include "grid.h"
 #include "particle.h"
 #include "interpolation.h"
 #include "force.h"
 #include <glm/glm.hpp>
 #include <Eigen/SVD>
+#include <glm/gtx/string_cast.hpp>
 
 using namespace Eigen;
 using namespace glm;

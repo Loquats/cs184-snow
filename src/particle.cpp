@@ -1,5 +1,5 @@
 #include <iostream>
-#include <glm/ext.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include "particle.h"
 
 void test_particle() {

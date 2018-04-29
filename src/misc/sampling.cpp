@@ -3,8 +3,6 @@
 //
 
 #include "sampling.h"
-#include "../particle.h"
-#include <glm/glm.hpp>
 #include <glm/gtc/random.hpp>
 
 using namespace glm;

@@ -1,11 +1,5 @@
-
-#include <glm/vec3.hpp>
-#include "../particle.h"
 #include "../grid.h"
 #include "plane.h"
-#include <Eigen/Dense>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/ext.hpp>
 
 #define SURFACE_OFFSET 0.0001
 using namespace glm;

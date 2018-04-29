@@ -7,14 +7,11 @@
 
 #include <iostream>
 #include <vector>
-#include "glm/ext.hpp"
 #include "particle.h"
 #include "grid.h"
 #include "force.h"
 #include "camera.h"
 #include "snowsim.h"
-#include "shader.h"
-#include "collision/collisionObject.h"
 #include "collision/plane.h"
 #include "misc/sampling.h"
 

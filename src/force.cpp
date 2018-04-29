@@ -1,8 +1,8 @@
 #include <iostream>
 #include <glm/glm.hpp>
 #include <Eigen/SVD>
+#include <glm/gtx/string_cast.hpp>
 
-#include "glm/ext.hpp"
 #include "force.h"
 
 using namespace std;
