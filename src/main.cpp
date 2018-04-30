@@ -13,6 +13,7 @@
 #include "camera.h"
 #include "snowsim.h"
 #include "collision/plane.h"
+#include "collision/rectangle.h"
 #include "misc/sampling.h"
 
 
@@ -175,11 +176,26 @@ int main(void)
   createSphereUniformParticles(grid, num_particles, radius);
   vector<CollisionObject *> objects;
 
+  // Make the ground plane
   Shader baseshader("../src/shaders/camera.vert", "../src/shaders/simple.frag");
+  vec3 grid_dim(dim_x, dim_y, dim_z);
   vec3 point(0.0f, -1.0f * dim_y * h / 2, 0.0f);
   vec3 normal(0.0f, 1.0f, 0.0f);
-  Plane *p = new Plane(point, normal, vec3(dim_x, dim_y, dim_z));
+  Plane *p = new Plane(point, normal, grid_dim);
   objects.push_back(p);
+
+  // make the wedge
+  glm::mat4 model;
+  model = glm::translate(model, glm::vec3(-float(grid_dim.x)/2, -float(grid_dim.y)/2, -float(grid_dim.z)/2));
+  vec3 corner(2, 2, 1);
+  vec3 top_edge(0, 0, 4);
+  vec3 edge1(1, -1, 0);
+  vec3 edge2(-1, -1, 0);
+  Rectangle* wedge_rect1 = new Rectangle(corner, top_edge, edge1, model);
+  Rectangle* wedge_rect2 = new Rectangle(corner, top_edge, edge2, model);
+  objects.push_back(wedge_rect1);
+  objects.push_back(wedge_rect2);
+
   glm::vec4 hot_pink(1.0f, 0.5f, 1.0f, 1.0f);
   baseshader.use();
   baseshader.setVec4("in_color", hot_pink);
