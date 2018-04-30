@@ -8,8 +8,24 @@ vec3 Plane::collide(vec3 position, vec3 next_position, vec3 velocity) {
 //    float test = dot(position - point, normal);
     float test_next = dot(next_position - point, normal);
     if (abs(test_next) < SURFACE_OFFSET) { // the particle crosses over
-        return vec3(0.0); // we want the particle to stop
-    } else {
+      // Friction collision
+      vec3 outward_normal;
+      if (dot(position - point, normal) > 0) {
+        outward_normal = normal;
+      } else {
+        outward_normal = -normal;
+      }
+      outward_normal = normalize(outward_normal);
+      float v_n = dot(velocity, outward_normal);
+      vec3 velocity_tangent = velocity - outward_normal * v_n;
+      float mag_velocity_tangent = length(velocity_tangent);
+      if (mag_velocity_tangent <= -mu * v_n) {
+        // Static friction
+        return vec3(0.0);
+      } else {
+        // Dynamic friction
+        return (1 + mu * v_n / mag_velocity_tangent) * velocity_tangent;
+      }    } else {
         return velocity;
     }
 }

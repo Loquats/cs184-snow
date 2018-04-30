@@ -181,7 +181,7 @@ int main(void)
   vec3 grid_dim(dim_x, dim_y, dim_z);
   vec3 point(0.0f, -1.0f * dim_y * h / 2, 0.0f);
   vec3 normal(0.0f, 1.0f, 0.0f);
-  Plane *p = new Plane(point, normal, grid_dim);
+  Plane *p = new Plane(point, normal, grid_dim, 0.5);
   objects.push_back(p);
 
   // make the wedge

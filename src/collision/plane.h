@@ -15,8 +15,8 @@ using namespace glm;
 
 struct Plane : public CollisionObject {
 public:
-  Plane(vec3 &point_in, vec3 &normal_in, const vec3 dim)
-      : dim(dim) {
+  Plane(vec3 &point_in, vec3 &normal_in, const vec3 dim, float mu)
+      : dim(dim), mu(mu) {
     worldtomodel = glm::translate(worldtomodel, glm::vec3(float(dim.x)/2, float(dim.y)/2, float(dim.z)/2));
 
     point = vec3(worldtomodel * vec4(point_in, 1.0));
@@ -71,7 +71,7 @@ public:
   mat4 worldtomodel;
 private:
   unsigned int plane_VAO, plane_VBO;
-
+  float mu;
 };
 
 #endif /* COLLISIONOBJECT_PLANE_H */
