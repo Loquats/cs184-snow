@@ -15,9 +15,11 @@ void Grid::resetGrid() {
   for (int i = 0; i < dim_x; ++i) {
       for (int j = 0; j < dim_y; ++j) {
           for (int k = 0; k < dim_z; ++k) {
-              nodes[i][j][k]->particles.clear();
+              nodes[i][j][k]->mass = 0;
               nodes[i][j][k]->velocity = vec3(0.0);
+              nodes[i][j][k]->next_velocity = vec3(0.0);
               nodes[i][j][k]->force = vec3(0.0);
+              nodes[i][j][k]->particles.clear();
           }
       }
   }
@@ -137,7 +139,9 @@ void Grid::particle_to_grid() {
   for (int i = 0; i < dim_x; ++i) {
     for (int j = 0; j < dim_y; ++j) {
       for (int k = 0; k < dim_z; ++k) {
-        nodes[i][j][k]->velocity /= nodes[i][j][k]->mass;
+        if (nodes[i][j][k]->mass > 0) {
+          nodes[i][j][k]->velocity /= nodes[i][j][k]->mass;
+        }
       }
     }
   }
