@@ -18,10 +18,26 @@ vec3 Rectangle::collide(vec3 position, vec3 next_position, vec3 velocity) {
     float proj_v = dot(next_position_plane, edge_v);
     if (proj_u > 0 && proj_u < length2(edge_u)
      && proj_v > 0 && proj_v < length2(edge_v)) {
-      // Simple collision: stop
-      return vec3(0.0);
+      // Friction collision
+      vec3 outward_normal;
+      if (dot(position - origin, normal) > 0) {
+        outward_normal = normal;
+      } else {
+        outward_normal = -normal;
+      }
+      float v_n = dot(velocity, outward_normal);
+      vec3 velocity_tangent = velocity - outward_normal * v_n;
+      float mag_velocity_tangent = length(velocity_tangent);
+      if (mag_velocity_tangent <= -mu * v_n) {
+        // Static friction
+        return vec3(0.0);
+      } else {
+        // Dynamic friction
+        return (1 + mu * v_n / mag_velocity_tangent) * velocity_tangent;
+      }
     }
   }
+  // No collision
   return velocity;
 }
 

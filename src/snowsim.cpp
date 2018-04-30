@@ -184,8 +184,8 @@ void SnowSimulator::drawContents() {
   // camera/view transformation
   glm::mat4 view = camera->GetViewMatrix();
   shader->setMat4("view", view);
-  drawGrid();
-  drawParticles();
+  drawGrid(glm::vec4(0.8, 0.8, 0.8, 1.0));
+  drawParticles(glm::vec4(0.7, 0.7, 0.7, 1.0));
 //  drawGridForces();
   drawParticleForces();
   for (CollisionObject *co : *collision_objects) {
@@ -193,17 +193,18 @@ void SnowSimulator::drawContents() {
   }
 }
 
-void SnowSimulator::drawGrid() {
+void SnowSimulator::drawGrid(glm::vec4 color) {
   glBindVertexArray(grid_VAO);
   glm::mat4 model;
   model = glm::translate(model, glm::vec3(-float(grid->dim_x)/2, -float(grid->dim_y)/2, -float(grid->dim_z)/2));
+  shader->setVec4("in_color", color);
   shader->setMat4("model", model);
   int num_vertices = (grid->dim_x + 1) * (grid->dim_y + 1) * (grid->dim_z + 1) * 2;
 
   glDrawArrays(GL_LINES, 0, num_vertices * 3);
 }
 
-void SnowSimulator::drawParticles() {
+void SnowSimulator::drawParticles(glm::vec4 color) {
   vector<Particle *>& all_particles = grid->all_particles;
 
   for(Particle* particle : all_particles) {
@@ -211,10 +212,12 @@ void SnowSimulator::drawParticles() {
     model = glm::translate(model, particle->position);
     model = glm::translate(model, glm::vec3(-float(grid->dim_x) / 2, -float(grid->dim_y) / 2, -float(grid->dim_z) / 2));
 //    model = glm::rotate(model, glm::radians(rotation), glm::vec3(1.0f, 0.3f, 0.5f));
+    shader->setVec4("in_color", color);
     shader->setMat4("model", model);
     glBindVertexArray(particle_VAO);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 24);
   }
+
 
 }
 
@@ -261,7 +264,7 @@ void SnowSimulator::drawGridForces() {
 
 void SnowSimulator::drawParticleForces() {
 
-  float ARROW_LENGTH_SCALAR = 2;
+  float ARROW_LENGTH_SCALAR = 0.2;
   int num_arrows = int(grid->all_particles.size());
   int num_vertices = num_arrows * 2;
   float particle_velocity_vertices[num_vertices * 3];

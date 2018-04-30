@@ -191,8 +191,9 @@ int main(void)
   vec3 top_edge(0, 0, 4);
   vec3 edge1(1, -1, 0);
   vec3 edge2(-1, -1, 0);
-  Rectangle* wedge_rect1 = new Rectangle(corner, top_edge, edge1, model);
-  Rectangle* wedge_rect2 = new Rectangle(corner, top_edge, edge2, model);
+  float mu = 0.5;
+  Rectangle* wedge_rect1 = new Rectangle(corner, top_edge, edge1, mu, model);
+  Rectangle* wedge_rect2 = new Rectangle(corner, top_edge, edge2, mu, model);
   objects.push_back(wedge_rect1);
   objects.push_back(wedge_rect2);
 

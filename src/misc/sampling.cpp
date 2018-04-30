@@ -29,3 +29,16 @@ void createSphereUniformParticles(Grid *grid, int num_particles, float radius) {
     }
     grid->resetGrid();
 }
+
+void createTwoParticles(Grid *grid) {
+    vec3 base(2, 2, 2);
+    Particle* p = new Particle(base + vec3(0.5, 0, 0), 1);
+    p->velocity = vec3(0.0);
+    grid->all_particles.push_back(p);
+
+    Particle* q = new Particle(base + vec3(-0.5, 0, 0), 1);
+    q->velocity = vec3(0.0);
+    grid->all_particles.push_back(q);
+
+    grid->resetGrid();
+  }

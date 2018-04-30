@@ -38,8 +38,8 @@ public:
 //  virtual bool resizeCallbackEvent(int width, int height);
 
 private:
-  void drawGrid();
-  void drawParticles();
+  void drawGrid(vec4 color);
+  void drawParticles(vec4 color);
   void drawGridForces();
   void drawParticleForces();
 

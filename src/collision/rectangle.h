@@ -10,8 +10,8 @@ using namespace glm;
 struct Rectangle : public CollisionObject {
 public:
   // input is in model space (0, 0, 0) to (dimx, dimy, dimz)
-  Rectangle(vec3 &origin, vec3 &edge_u, vec3 &edge_v, mat4 model) 
-    : origin(origin), edge_u(edge_u), edge_v(edge_v), model(model) {
+  Rectangle(vec3 &origin, vec3 &edge_u, vec3 &edge_v, float mu, mat4 model) 
+    : origin(origin), edge_u(edge_u), edge_v(edge_v), mu(mu), model(model) {
       // Check if rectangle is valid: edges must be orthogonal
       if (abs(dot(edge_u, edge_v)) > 0) {
         throw "bad rectangle";
@@ -44,7 +44,7 @@ public:
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
       glEnableVertexAttribArray(0);
 
-      color = vec4(0.7f, 0.7f, 0.7f, 1.0f);
+      color = vec4(0.3f, 0.3f, 0.3f, 1.0f);
   }
 
   void render(Shader *shader);
@@ -56,6 +56,7 @@ private:
   vec3 edge_u;
   vec3 edge_v;
   vec3 normal;
+  float mu;     // friction coefficient
 
   // For rendering
   const int static num_vertices = 4;
