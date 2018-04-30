@@ -40,6 +40,8 @@ public:
 private:
   void drawGrid();
   void drawParticles();
+  void drawGridForces();
+  void drawParticleForces();
 
   // Camera methods
 
@@ -63,6 +65,8 @@ private:
   Shader *shader;
   unsigned int grid_VAO, grid_VBO;
   unsigned int particle_VAO, particle_VBO;
+  unsigned int grid_force_VAO, grid_force_VBO;
+  unsigned int particle_velocity_VAO, particle_velocity_VBO;
 
   const unsigned int SCR_WIDTH = 800;
   const unsigned int SCR_HEIGHT = 600;
