@@ -1,6 +1,11 @@
 #include <glm/glm.hpp>
 #include "interpolation.h"
 
+const int NFUNCRESOLUTION = 10000;
+const float NFUNCSPACING = 4.0f/NFUNCRESOLUTION;
+static float n_func[NFUNCRESOLUTION] = {0};
+static float n_func_derivative[NFUNCRESOLUTION] = {0};
+
 /* sign function: https://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
 */ 
 float sgn(float x) {
@@ -30,12 +35,42 @@ float N_func_derivative(float x) {
 	}
 }
 
+void n_func_init() {
+	//precompute nfunc
+	for (int i = 0; i < NFUNCRESOLUTION; i++) {
+		n_func[i] = N_func(((i+0.5) * NFUNCSPACING) - 2);
+	}
+}
+
+float inline n_func_memoized(float x) {
+	if (x < 2 or x > 2) {
+		return 0;
+	}
+	int idx = int(floor((x+2)/NFUNCSPACING));
+	return n_func[idx];
+}
+
+void n_func_derivative_init() {
+	//precompute nfunc
+	for (int i = 0; i < NFUNCRESOLUTION; i++) {
+		n_func_derivative[i] = N_func_derivative(((i+0.5) * NFUNCSPACING) - 2);
+	}
+}
+
+float inline n_func_derivative_memoized(float x) {
+	if (x < 2 or x > 2) {
+		return 0;
+	}
+	int idx = int(floor((x+2)/NFUNCSPACING));
+	return n_func_derivative[idx];
+}
+
 float b_spline(glm::vec3 scaled) {
-	return N_func(scaled.x) * N_func(scaled.y) * N_func(scaled.z);
+	return n_func_memoized(scaled.x) * n_func_memoized(scaled.y) * n_func_memoized(scaled.z);
 }
 
 glm::vec3 b_spline_components(glm::vec3 scaled) {
-	return glm::vec3(N_func(scaled.x), N_func(scaled.y), N_func(scaled.z));
+	return glm::vec3(n_func_memoized(scaled.x), n_func_memoized(scaled.y), n_func_memoized(scaled.z));
 }
 
 /*
@@ -43,8 +78,8 @@ glm::vec3 b_spline_components(glm::vec3 scaled) {
 */
 glm::vec3 b_spline_grad(glm::vec3 scaled, float h) {
 	glm::vec3 components = b_spline_components(scaled);
-	float dx = components.y * components.z * N_func_derivative(scaled.x) / h;
-	float dy = components.x * components.z * N_func_derivative(scaled.y) / h;
-	float dz = components.x * components.y * N_func_derivative(scaled.z) / h;
+	float dx = components.y * components.z * n_func_derivative_memoized(scaled.x) / h;
+	float dy = components.x * components.z * n_func_derivative_memoized(scaled.y) / h;
+	float dz = components.x * components.y * n_func_derivative_memoized(scaled.z) / h;
 	return glm::vec3(dx, dy , dz);
 }
