@@ -285,7 +285,7 @@ void Grid::update_particle_velocities(float alpha) {
         }
       }
     }
-    particle->velocity += (1.f - alpha) * v_pic + alpha * v_flip;
+    particle->velocity = (1.f - alpha) * v_pic + alpha * v_flip;
   }
 }
 
