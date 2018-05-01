@@ -111,13 +111,14 @@ void SnowSimulator::init(Camera *camera, Shader *shader, glm::mat4 model) {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
 
+  float vs = 0.2;
   GLfloat cube_vertices[] = {
-          -0.05, -0.05, -0.05,   -0.05, -0.05,  0.05,   -0.05,  0.05,  0.05,   -0.05,  0.05, -0.05,
-          0.05, -0.05, -0.05,    0.05, -0.05,  0.05,    0.05,  0.05,  0.05,    0.05,  0.05, -0.05,
-          -0.05, -0.05, -0.05,   -0.05, -0.05,  0.05,    0.05, -0.05,  0.05,    0.05, -0.05, -0.05,
-          -0.05,  0.05, -0.05,   -0.05,  0.05,  0.05,    0.05,  0.05,  0.05,    0.05,  0.05, -0.05,
-          -0.05, -0.05, -0.05,   -0.05,  0.05, -0.05,    0.05,  0.05, -0.05,    0.05, -0.05, -0.05,
-          -0.05, -0.05,  0.05,   -0.05,  0.05,  0.05,    0.05,  0.05,  0.05,    0.05, -0.05,  0.05
+          -vs, -vs, -vs,   -vs, -vs,  vs,   -vs,  vs,  vs,   -vs,  vs, -vs,
+          vs, -vs, -vs,    vs, -vs,  vs,    vs,  vs,  vs,    vs,  vs, -vs,
+          -vs, -vs, -vs,   -vs, -vs,  vs,    vs, -vs,  vs,    vs, -vs, -vs,
+          -vs,  vs, -vs,   -vs,  vs,  vs,    vs,  vs,  vs,    vs,  vs, -vs,
+          -vs, -vs, -vs,   -vs,  vs, -vs,    vs,  vs, -vs,    vs, -vs, -vs,
+          -vs, -vs,  vs,   -vs,  vs,  vs,    vs,  vs,  vs,    vs, -vs,  vs
   };
 
   glGenVertexArrays(1, &particle_VAO);

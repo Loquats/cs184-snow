@@ -51,10 +51,9 @@ private:
 
   // Default simulation values
 
-  //todo we probably need to fuck with this
   int frames_per_sec = 30;
   int length;
-  float delta_t = 1e-5;
+  float delta_t = 1e-3;
 
   glm::mat4 model;
 
