@@ -168,9 +168,9 @@ void SnowSimulator::drawContents() {
     float frame_time = float(1. / frames_per_sec);
     int simulation_steps = int(std::round(frame_time / delta_t));
     clock_t start = clock();
-
+    float E0 = 1.4e5;
     for (int i = 0; i < simulation_steps; i++) {
-      grid->simulate(delta_t, external_accelerations, collision_objects);
+      grid->simulate(delta_t, external_accelerations, collision_objects, E0);
     }
     double duration = (clock() - start) / (double) CLOCKS_PER_SEC;
     cout << "Frame time: " << duration << " seconds\n";

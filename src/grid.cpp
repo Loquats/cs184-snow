@@ -33,9 +33,10 @@ void Grid::resetGrid() {
   }
 }
 
-void Grid::simulate(float delta_t, vector<vec3> external_accelerations, vector<CollisionObject *> *collision_objects) {
-    float mu_0 = 1.0;
-    float lambda_0 = 1.0;
+void Grid::simulate(float delta_t, vector<vec3> external_accelerations, vector<CollisionObject *> *collision_objects, float E0) {
+    float v0 = 0.2;
+    float mu_0 = E0 / (2. * (1.+v0));
+    float lambda_0 = E0 * v0 / ((1.+v0) * (1.-2.*v0));
     float xi = 10;
     float theta_c = 2.5e-2;
     float theta_s = 7.5e-3;
