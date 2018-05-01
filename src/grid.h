@@ -13,13 +13,12 @@ struct GridNode {
 	vec3 index;	// the {i, j, k} index of the grid node
 
 	float mass;			// interpolated mass
-	vec3 velocity;	// interpolated velocity
+	vec3 velocity;		// interpolated velocity
 	vec3 next_velocity; // for part 4, 5, 6
 	vec3 force;
 	vector<Particle *> particles;
 };
 
-// typedef vector<vector<vector<GridNode *> > > Grid;
 class Grid {
 public:
 
@@ -100,6 +99,11 @@ public:
 	 * Step 9: Particle-based collisions
 	 */
 	void compute_particle_collisions(float delta_t, vector<CollisionObject *> *objects);
+
+	/*
+	 * Step 10: Update particle positions
+	 */
+	void update_particle_positions(float delta_t);
 };
 
 #endif /* GRID_H */
