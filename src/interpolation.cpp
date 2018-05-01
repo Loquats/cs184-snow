@@ -43,7 +43,7 @@ void n_func_init() {
 }
 
 float inline n_func_memoized(float x) {
-	if (x < 2 or x > 2) {
+	if (x < -2 or x > 2) {
 		return 0;
 	}
 	int idx = int(floor((x+2)/NFUNCSPACING));
@@ -58,7 +58,7 @@ void n_func_derivative_init() {
 }
 
 float inline n_func_derivative_memoized(float x) {
-	if (x < 2 or x > 2) {
+	if (x < -2 or x > 2) {
 		return 0;
 	}
 	int idx = int(floor((x+2)/NFUNCSPACING));

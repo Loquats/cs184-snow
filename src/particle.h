@@ -43,7 +43,6 @@ public:
     j_hi = std::min((int) floor(position.y / h + 2) + 1, (int) dim_y);
     k_lo = std::max((int) ceil(position.z / h - 2), 0);
     k_hi = std::min((int) floor(position.z / h + 2) + 1, (int) dim_z);
-    // std::cout << i_hi - i_lo << " " << j_hi - j_lo << " " << k_hi - k_lo << "\n";
   }
 
   void compute_b_spline_grad(float h) {
