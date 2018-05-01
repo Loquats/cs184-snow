@@ -236,8 +236,8 @@ void SnowSimulator::drawGridForces() {
   for (int i = 0; i < grid->dim_x; ++i) {
     for (int j = 0; j < grid->dim_y; ++j) {
       for (int k = 0; k < grid->dim_z; ++k) {
-        vec3* force = &grid->nodes[i][j][k]->force;
-        if (force->x == 0 and force->y == 0 and force->z == 0) {
+        vec3 force = grid->node_map[ivec3(i,j,k)]->force;
+        if (force.x == 0 and force.y == 0 and force.z == 0) {
           continue;
         }
         vec3 center((i + 0.5) * grid->h, (j + 0.5) * grid->h, (k + 0.5) * grid->h);
@@ -245,7 +245,7 @@ void SnowSimulator::drawGridForces() {
         grid_force_vertices[counter+1] = center.y;
         grid_force_vertices[counter+2] = center.z;
         counter += 3;
-        vec3 copied_force(*force);
+        vec3 copied_force(force);
         copied_force *= ARROW_LENGTH_SCALAR;
         grid_force_vertices[counter] = center.x + copied_force.x;
         grid_force_vertices[counter+1] = center.y + copied_force.y;
