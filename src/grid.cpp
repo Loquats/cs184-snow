@@ -112,8 +112,6 @@ void Grid::particle_to_grid() {
 void Grid::compute_particle_volumes() {
   float h3 = pow(h, 3);
   for (Particle *particle : all_particles) {
-    vec3 pos = particle->position;
-
     float density = 0;
     for (int dest_i = particle->i_lo; dest_i < particle->i_hi; ++dest_i) {
       for (int dest_j = particle->j_lo; dest_j < particle->j_hi; ++dest_j) {
@@ -136,8 +134,6 @@ void Grid::compute_particle_volumes() {
 void Grid::compute_F_hat_Ep(float delta_t) {
   float h3 = pow(h, 3);
   for (Particle *particle : all_particles) {
-    vec3 pos = particle->position;
-
     mat3 sum = mat3(0.0f);
     for (int dest_i = particle->i_lo; dest_i < particle->i_hi; ++dest_i) {
       for (int dest_j = particle->j_lo; dest_j < particle->j_hi; ++dest_j) {
@@ -159,8 +155,6 @@ void Grid::compute_F_hat_Ep(float delta_t) {
 void Grid::compute_grid_forces(float mu_0, float lambda_0, float xi) {
   float h3 = pow(h, 3);
   for (Particle *particle : all_particles) {
-    vec3 pos = particle->position;
-
     float volume = particle->volume;
     mat3 sigma_p = psi_derivative(mu_0, lambda_0, xi, particle) * transpose(particle->deformation_grad_E);
 
@@ -236,8 +230,6 @@ void Grid::compute_time_integration() {
 */
 void Grid::update_deformation_gradients(float theta_c, float theta_s, float delta_t) {
   for (Particle *particle : all_particles) {
-    vec3 pos = particle->position;
-
     mat3 grad_vp = mat3(0.0f);
 
     for (int dest_i = particle->i_lo; dest_i < particle->i_hi; ++dest_i) {
@@ -280,8 +272,6 @@ void Grid::update_deformation_gradients(float theta_c, float theta_s, float delt
  */
 void Grid::update_particle_velocities(float alpha) {
   for (Particle *particle : all_particles) {
-    vec3 pos = particle->position;
-
     vec3 v_pic = vec3(0.0);
     vec3 v_flip = particle->velocity;
 
