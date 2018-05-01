@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <vector>
+#include <getopt.h>
 #include "particle.h"
 #include "grid.h"
 #include "force.h"
@@ -17,8 +18,8 @@
 #include "misc/sampling.h"
 
 
-const unsigned int SCR_WIDTH = 1600;
-const unsigned int SCR_HEIGHT = 1200;
+int SCR_WIDTH = 1200;
+int SCR_HEIGHT = 800;
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 7.0f));
 float lastX = SCR_WIDTH / 2.0f;
@@ -65,6 +66,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
   // make sure the viewport matches the new window dimensions; note that width and
   // height will be significantly larger than specified on retina displays.
   glViewport(0, 0, width, height);
+  SCR_WIDTH = width;
+  SCR_HEIGHT = height;
 }
 
 
@@ -144,8 +147,48 @@ void cameraInputTick() {
   processInput(window);
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
+  // renders to a file instead of displaying.
+  // ONLY USE THESE COMMAND LINE ARGS IF IN HEADLESS MODE.  OTHERWISE FPS AND LENGTH WILL JUST TERMINATE
+  // THE PROGRAM AFTER A CERTAIN NUMBER OF FRAMES ARE CREATED
+  bool headless = false;
+  string outFilename = "out.avi";
+  // numframes in output
+  int length = 30;
+
+  // fps wanted
+  int frames_per_second = 30;
+
+  if (argc == 1) { // No arguments, default initialization
+    outFilename = "out.avi";
+    // default 4 seconds at 30 fps
+    length = 120;
+    frames_per_second = 30;
+//    loadObjectsFromFile(default_file_name, &cloth, &cp, &objects);
+  } else {
+    int c;
+
+    while ((c = getopt (argc, argv, "o:l:n:h")) != -1) {
+      switch (c) {
+        case 'h':
+          headless = true;
+          break;
+        case 'o':
+          outFilename = string(optarg);
+          break;
+        case 'l':
+          length = atoi(optarg);
+          break;
+        case 'n':
+          frames_per_second = atoi(optarg);
+          break;
+        default:
+          cout << optopt;
+          break;
+      }
+    }
+  }
 
   loadOpenGl();
 
@@ -167,7 +210,7 @@ int main(void)
   float h = 1.0;
   Grid* grid = new Grid(dim_x, dim_y, dim_z, h);
 
-  snowsim = new SnowSimulator();
+  snowsim = new SnowSimulator(frames_per_second, length);
   snowsim->loadGrid(grid);
 
   //todo define object schemas and shit and find way to load
@@ -203,10 +246,24 @@ int main(void)
   snowsim->init(&camera, &baseshader);
   snowsim->loadCollisionObjects(&objects);
 
-  int iter = 0;
-  while (!glfwWindowShouldClose(window))
+  int frame_counter = 0;
+  char command[400];
+  float *data;
+  FILE *ffmpeg;
+
+  int w_ = 0;
+  int h_ = 0;
+  glfwGetFramebufferSize(window, &w_, &h_);
+
+  if (headless) {
+    snprintf(command, sizeof(command), "ffmpeg -vcodec rawvideo -f rawvideo -pix_fmt rgba -s %dx%d -i pipe: -vf vflip -vcodec h264 -r %d %s", w_, h_, frames_per_second, outFilename.c_str());
+    ffmpeg = popen(command, "w");
+    data = (float *)malloc(sizeof(float) * 4 * w_ * h_);
+  }
+
+  while (!glfwWindowShouldClose(window) and frame_counter < length)
     {
-      cout << "Iteration " << iter << " ";
+      cout << "Iteration " << frame_counter << " ";
       cameraInputTick();
 
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -216,8 +273,25 @@ int main(void)
 
       glfwPollEvents();
 
+
+      if(headless) {
+        GLenum err;
+        while ((err = glGetError()) != GL_NO_ERROR) {
+          cerr << "OpenGL error: " << err << endl;
+        }
+        glReadPixels(0, 0, w_, h_, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        while ((err = glGetError()) != GL_NO_ERROR) {
+          cerr << "OpenGL error: " << err << endl;
+        }
+        fwrite(data, w_ * h_ * 4, 1, ffmpeg);
+      }
+
       glfwSwapBuffers(window);
-      ++iter;
+
+      frame_counter++;
+    }
+    if(headless) {
+      pclose(ffmpeg);
     }
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
