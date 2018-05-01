@@ -16,8 +16,8 @@ SnowSimulator::SnowSimulator(int frames_per_sec, int length) {
 
   this->frames_per_sec = frames_per_sec;
   this->length = length;
-  glEnable(GL_PROGRAM_POINT_SIZE);
-  glEnable(GL_DEPTH_TEST);
+//  glEnable(GL_PROGRAM_POINT_SIZE);
+//  glEnable(GL_DEPTH_TEST);
 }
 
 //SnowSimulator::~SnowSimulator() {
@@ -188,7 +188,7 @@ void SnowSimulator::drawContents() {
   glm::mat4 view = camera->GetViewMatrix();
   shader->setMat4("view", view);
   // drawGrid(glm::vec4(0.8, 0.8, 0.8, 1.0));
-  drawParticles(glm::vec4(0.7, 0.7, 0.7, 1.0));
+  drawParticles(glm::vec4(0.7, 0.7, 0.7, 0.7));
 //  drawGridForces();
   drawParticleForces();
   for (CollisionObject *co : *collision_objects) {
