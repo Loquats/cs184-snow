@@ -144,7 +144,7 @@ void Grid::compute_F_hat_Ep(float delta_t) {
       }
     }
     mat3 identity = mat3(1.0f);
-    particle->F_hat_Ep = (identity + sum) * particle->deformation_grad_P;
+    particle->F_hat_Ep = (identity + sum) * particle->deformation_grad_E;
   }
 }
 
@@ -195,6 +195,7 @@ void Grid::compute_grid_velocities(float delta_t, vector<CollisionObject *> *col
     for (int j = 0; j < dim_y; ++j) {
       for (int k = 0; k < dim_z; ++k) {
         GridNode* node = nodes[i][j][k];
+        node->next_velocity = node->velocity;
         if (node->mass > 0) {
           node->next_velocity += node->force * delta_t / node->mass;
         }

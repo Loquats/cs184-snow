@@ -5,9 +5,9 @@
 using namespace glm;
 
 vec3 Plane::collide(vec3 position, vec3 next_position, vec3 velocity) {
-//    float test = dot(position - point, normal);
+    float test = dot(position - point, normal);
     float test_next = dot(next_position - point, normal);
-    if (abs(test_next) < SURFACE_OFFSET) { // the particle crosses over
+    if (abs(test_next) < SURFACE_OFFSET || test * test_next < 0) { // the particle crosses over
       // Friction collision
       vec3 outward_normal;
       if (dot(position - point, normal) > 0) {
