@@ -47,7 +47,7 @@ public:
 
 	void resetGrid();
 	void loadParticles(vector<Particle *> particles) { this->all_particles = particles; };
-	void simulate(float delta_t, vector<vec3> external_accelerations, vector<CollisionObject *> *collision_objects);
+	void simulate(float delta_t, vector<vec3> external_accelerations, vector<CollisionObject *> *collision_objects, float E0);
 
 	/*
 	* Step 1: compute the mass and velocity of each grid node based the particles
