@@ -8,8 +8,9 @@ using namespace glm;
 vec3 Rectangle::collide(vec3 position, vec3 next_position, vec3 velocity) {
   // Check if next_position enters infinite plane
   vec3 next_position_origin = next_position - origin;
-  float offset = dot(next_position_origin, normal);
-  if (abs(offset) < SURFACE_OFFSET) {
+  float offset = dot(position - origin, normal);
+  float offset_next = dot(next_position - origin, normal);
+  if (abs(offset) < SURFACE_OFFSET ||  offset * offset_next < 0) {
     // Check if next_position is within finite bounds
 
     // Projection to plane
