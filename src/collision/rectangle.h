@@ -10,8 +10,8 @@ using namespace glm;
 struct Rectangle : public CollisionObject {
 public:
   // input is in model space (0, 0, 0) to (dimx, dimy, dimz)
-  Rectangle(vec3 &origin, vec3 &edge_u, vec3 &edge_v, float mu, mat4 model) 
-    : origin(origin), edge_u(edge_u), edge_v(edge_v), mu(mu), model(model) {
+  Rectangle(vec3 &origin, vec3 &edge_u, vec3 &edge_v, float mu, mat4 model, vec4 color) 
+    : origin(origin), edge_u(edge_u), edge_v(edge_v), mu(mu), model(model), color(color) {
       // Check if rectangle is valid: edges must be orthogonal
       if (abs(dot(edge_u, edge_v)) > 0) {
         throw "bad rectangle";
@@ -43,8 +43,6 @@ public:
       glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
       glEnableVertexAttribArray(0);
-
-      color = vec4(0.3f, 0.3f, 0.3f, 1.0f);
   }
 
   void render(Shader *shader);

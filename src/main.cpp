@@ -20,7 +20,7 @@
 int SCR_WIDTH = 800;
 int SCR_HEIGHT = 600;
 // camera
-Camera camera(glm::vec3(0.0f, -4.0f, 0.0f));
+Camera camera(glm::vec3(0.0f, -6.0f, 0.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -227,22 +227,25 @@ int main(int argc, char **argv)
   // createTwoParticles(grid);
   vector<CollisionObject *> objects;
 
-  // Make the ground plane
   Shader baseshader("../src/shaders/camera.vert", "../src/shaders/simple.frag");
-  vec3 grid_dim(dim_x, dim_y, dim_z);
-  vec3 point(0.0f, -1.0f * dim_y * h / 2, 0.0f);
-  vec3 normal(0.0f, 1.0f, 0.0f);
-  Plane *p = new Plane(point, normal, grid_dim, 0.5);
-  objects.push_back(p);
 
-  // make the wedge
-  vec3 corner(0.5*dim_x, 0.3*dim_y, 0.1*dim_z);
+  // Make the ground plane
+  vec4 ground_color = vec4(0.3f, 0.3f, 0.3f, 1.0f);
+  vec3 origin(0, 0, 0);
+  vec3 axis_x(dim_x, 0, 0);
+  vec3 axis_y(0, 0, dim_z);
+  Rectangle* ground_rect = new Rectangle(origin, axis_x, axis_y, 0.2, model, ground_color);
+  objects.push_back(ground_rect);
+
+  // Make the wedge
+  vec4 wedge_color = vec4(0.5f, 0.5f, 0.5f, 1.0f);
+  vec3 corner(0.5*dim_x, 0.45*dim_y, 0.1*dim_z);
   vec3 top_edge(0, 0, 0.8 * dim_z);
-  vec3 edge1(0.25*dim_x, -0.25*dim_y, 0);
-  vec3 edge2(-0.25*dim_x, -0.25*dim_y, 0);
-  float mu = 0.5;
-  Rectangle* wedge_rect1 = new Rectangle(corner, top_edge, edge1, mu, model);
-  Rectangle* wedge_rect2 = new Rectangle(corner, top_edge, edge2, mu, model);
+  vec3 edge1(0.15*dim_x, -0.15*dim_y, 0);
+  vec3 edge2(-0.15*dim_x, -0.15*dim_y, 0);
+  float mu = 0.2;
+  Rectangle* wedge_rect1 = new Rectangle(corner, top_edge, edge1, mu, model, wedge_color);
+  Rectangle* wedge_rect2 = new Rectangle(corner, top_edge, edge2, mu, model, wedge_color);
   objects.push_back(wedge_rect1);
   objects.push_back(wedge_rect2);
 
