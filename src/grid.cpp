@@ -11,25 +11,50 @@ using namespace Eigen;
 using namespace glm;
 
 void Grid::resetGrid() {
-  for (int i = 0; i < dim_x; ++i) {
-      for (int j = 0; j < dim_y; ++j) {
-          for (int k = 0; k < dim_z; ++k) {
-              nodes[i][j][k]->mass = 0;
-              nodes[i][j][k]->velocity = vec3(0.0);
-              nodes[i][j][k]->next_velocity = vec3(0.0);
-              nodes[i][j][k]->force = vec3(0.0);
-              nodes[i][j][k]->particles.clear();
-          }
-      }
-  }
+//  for (int i = 0; i < dim_x; ++i) {
+//      for (int j = 0; j < dim_y; ++j) {
+//          for (int k = 0; k < dim_z; ++k) {
+//              GridNode *node = nodes[i][j][k];
+//              if (node != NULL) {
+//                  node->mass = 0;
+//                  node->velocity = vec3(0.0);
+//                  node->next_velocity = vec3(0.0);
+//                  node->force = vec3(0.0);
+//                  node->particles.clear();
+//              }
+//          }
+//      }
+//  }
+    for (auto it = node_map.begin(); it != node_map.end(); ++it) {
+        GridNode *node = it->second;
+        node->mass = 0;
+        node->velocity = vec3(0.0);
+        node->next_velocity = vec3(0.0);
+        node->force = vec3(0.0);
+        node->particles.clear();
+    }
   for (Particle *particle : all_particles) {
     // I'm not 100% sure rounding is the right thing to do, but the b-spline is centered on the grid index itself so I think it's right
     // Gonna use floor for now to be consistent with the rest of the code
     // TODO: figure this out
-    ivec3 index = glm::floor(particle->position); 
-    nodes[index.x][index.y][index.z]->particles.push_back(particle);
     particle->compute_neighborhood_bounds(dim_x, dim_y, dim_z, h);
     particle->compute_b_spline_grad(h);
+    for (int dest_i = particle->i_lo; dest_i < particle->i_hi; ++dest_i) {
+      for (int dest_j = particle->j_lo; dest_j < particle->j_hi; ++dest_j) {
+        for (int dest_k = particle->k_lo; dest_k < particle->k_hi; ++dest_k) {
+          ivec3 index = ivec3(dest_i, dest_j, dest_k);
+          if (node_map.find(index) == node_map.end()) {
+            GridNode *node = new GridNode();
+            node->index = index;
+            node_map[index] = node;
+          }
+        }
+      }
+    }
+    ivec3 index = glm::floor(particle->position);
+//    nodes[index.x][index.y][index.z]->particles.push_back(particle);
+    node_map[index]->particles.push_back(particle);
+    particle->velocity = vec3(0.0);
   }
 }
 
@@ -86,22 +111,29 @@ void Grid::particle_to_grid() {
       for (int dest_j = particle->j_lo; dest_j < particle->j_hi; ++dest_j) {
         for (int dest_k = particle->k_lo; dest_k < particle->k_hi; ++dest_k) {
           float weight = particle->b_spline_at(dest_i, dest_j, dest_k);
-          nodes[dest_i][dest_j][dest_k]->mass += weight * particle->mass;
-          nodes[dest_i][dest_j][dest_k]->velocity += weight * particle->mass * particle->velocity;
+          GridNode *node = node_map[ivec3(dest_i, dest_j, dest_k)];
+          node->mass += weight * particle->mass;
+          node->velocity += weight * particle->mass * particle->velocity;
         }
       }
     }
   }
 
-  // Normalize grid velocity by its mass all at once
-  for (int i = 0; i < dim_x; ++i) {
-    for (int j = 0; j < dim_y; ++j) {
-      for (int k = 0; k < dim_z; ++k) {
-        if (nodes[i][j][k]->mass > 0) {
-          nodes[i][j][k]->velocity /= nodes[i][j][k]->mass;
-        }
-      }
-    }
+////   Normalize grid velocity by its mass all at once
+//  for (int i = 0; i < dim_x; ++i) {
+//    for (int j = 0; j < dim_y; ++j) {
+//      for (int k = 0; k < dim_z; ++k) {
+//        if (nodes[i][j][k] != NULL && nodes[i][j][k]->mass > 0) {
+//          nodes[i][j][k]->velocity /= nodes[i][j][k]->mass;
+//        }
+//      }
+//    }
+//  }
+
+//   Normalize grid velocity by its mass all at once
+  for (auto it = node_map.begin(); it != node_map.end(); ++it) {
+    GridNode *node = it->second;
+    node->velocity /= node->mass;
   }
 }
 
@@ -109,14 +141,15 @@ void Grid::particle_to_grid() {
 * Step 2: compute the density and volume of each particle
 */
 void Grid::compute_particle_volumes() {
-  float h3 = pow(h, 3);
+  float h3 = h * h * h;
   for (Particle *particle : all_particles) {
     float density = 0;
     for (int dest_i = particle->i_lo; dest_i < particle->i_hi; ++dest_i) {
       for (int dest_j = particle->j_lo; dest_j < particle->j_hi; ++dest_j) {
         for (int dest_k = particle->k_lo; dest_k < particle->k_hi; ++dest_k) {
           float weight = particle->b_spline_at(dest_i, dest_j, dest_k);
-          density += weight * nodes[dest_i][dest_j][dest_k]->mass;
+          GridNode *node = node_map[ivec3(dest_i, dest_j, dest_k)];
+          density += weight * node->mass;
         }
       }
     }
@@ -131,14 +164,15 @@ void Grid::compute_particle_volumes() {
 *   to save one full iteration over the grid cells and Particle* pointers?
 */
 void Grid::compute_F_hat_Ep(float delta_t) {
-  float h3 = pow(h, 3);
+  float h3 = h * h * h;
   for (Particle *particle : all_particles) {
     mat3 sum = mat3(0.0f);
     for (int dest_i = particle->i_lo; dest_i < particle->i_hi; ++dest_i) {
       for (int dest_j = particle->j_lo; dest_j < particle->j_hi; ++dest_j) {
         for (int dest_k = particle->k_lo; dest_k < particle->k_hi; ++dest_k) {
           vec3 weight_grad = particle->b_spline_grad_at(dest_i, dest_j, dest_k);
-          vec3 velocity = nodes[dest_i][dest_j][dest_k]->velocity;
+          GridNode *node = node_map[ivec3(dest_i, dest_j, dest_k)];
+          vec3 velocity = node->velocity;
           sum += delta_t * outerProduct(velocity, weight_grad);
         }
       }
@@ -152,7 +186,7 @@ void Grid::compute_F_hat_Ep(float delta_t) {
 * Step 3: compute force for each grid cell
 */
 void Grid::compute_grid_forces(float mu_0, float lambda_0, float xi) {
-  float h3 = pow(h, 3);
+  float h3 = h * h * h;
   for (Particle *particle : all_particles) {
     float volume = particle->volume;
     mat3 sigma_p = psi_derivative(mu_0, lambda_0, xi, particle) * transpose(particle->deformation_grad_E);
@@ -163,7 +197,8 @@ void Grid::compute_grid_forces(float mu_0, float lambda_0, float xi) {
       for (int dest_j = particle->j_lo; dest_j < particle->j_hi; ++dest_j) {
         for (int dest_k = particle->k_lo; dest_k < particle->k_hi; ++dest_k) {
           vec3 weight_grad = particle->b_spline_grad_at(dest_i, dest_j, dest_k);
-          nodes[dest_i][dest_j][dest_k]->force -= neg_force_unweighted * weight_grad;
+          GridNode *node = node_map[ivec3(dest_i, dest_j, dest_k)];
+          node->force -= neg_force_unweighted * weight_grad;
         }
       }
     }
@@ -174,39 +209,51 @@ void Grid::compute_grid_forces(float mu_0, float lambda_0, float xi) {
  * Apply external forces, e.g. gravity
  */
 void Grid::apply_ext_accelerations(vector<vec3> external_accelerations) {
-  for (int i = 0; i < dim_x; ++i) {
-    for (int j = 0; j < dim_y; ++j) {
-      for (int k = 0; k < dim_z; ++k) {
-        // Explicit update: just copy it all over
-        GridNode* node = nodes[i][j][k];
-        for (vec3 acc : external_accelerations) {
-          node->force += acc * node->mass;
-        }
-      }
-    }
-  }
+  return;
+//  for (int i = 0; i < dim_x; ++i) {
+//    for (int j = 0; j < dim_y; ++j) {
+//      for (int k = 0; k < dim_z; ++k) {
+//        // Explicit update: just copy it all over
+//        GridNode* node = nodes[i][j][k];
+//        for (vec3 acc : external_accelerations) {
+//          node->force += acc * node->mass;
+//        }
+//      }
+//    }
+//  }
 }
 
 /*
  * Step 4 and 5: update grid node velocities, do collisions
  */
 void Grid::compute_grid_velocities(float delta_t, vector<CollisionObject *> *collision_objects) {
-  for (int i = 0; i < dim_x; ++i) {
-    for (int j = 0; j < dim_y; ++j) {
-      for (int k = 0; k < dim_z; ++k) {
-        GridNode* node = nodes[i][j][k];
-        node->next_velocity = node->velocity;
-        if (node->mass > 0) {
-          node->next_velocity += node->force * delta_t / node->mass;
-        }
-        vec3 position = node->index * h;
-        vec3 next_position = position + node->velocity * delta_t;
-        for (CollisionObject* co : *collision_objects) {
-          node->next_velocity = co->collide(position, next_position, node->next_velocity);
-        }
-      }
+//  for (int i = 0; i < dim_x; ++i) {
+//    for (int j = 0; j < dim_y; ++j) {
+//      for (int k = 0; k < dim_z; ++k) {
+//        GridNode* node = nodes[i][j][k];
+//        node->next_velocity = node->velocity;
+//        if (node->mass > 0) {
+//          node->next_velocity += node->force * delta_t / node->mass;
+//        }
+//        vec3 position = node->index * h;
+//        vec3 next_position = position + node->velocity * delta_t;
+//        for (CollisionObject* co : *collision_objects) {
+//          node->next_velocity = co->collide(position, next_position, node->next_velocity);
+//        }
+//      }
+
+  for (auto it = node_map.begin(); it != node_map.end(); ++it) {
+    GridNode *node = it->second;
+    if (node->mass > 0) {
+      node->next_velocity += node->force * delta_t / node->mass;
+    }
+    vec3 position = node->index * h;
+    vec3 next_position = position + node->velocity * delta_t;
+    for (CollisionObject *co : *collision_objects) {
+      node->next_velocity = co->collide(position, next_position, node->next_velocity);
     }
   }
+
 }
 
 /*
@@ -235,8 +282,9 @@ void Grid::update_deformation_gradients(float theta_c, float theta_s, float delt
     for (int dest_i = particle->i_lo; dest_i < particle->i_hi; ++dest_i) {
       for (int dest_j = particle->j_lo; dest_j < particle->j_hi; ++dest_j) {
         for (int dest_k = particle->k_lo; dest_k < particle->k_hi; ++dest_k) {
+          GridNode *node = node_map[ivec3(dest_i, dest_j, dest_k)];
           vec3 weight_grad = particle->b_spline_grad_at(dest_i, dest_j, dest_k);
-          vec3 velocity = nodes[dest_i][dest_j][dest_k]->next_velocity;
+          vec3 velocity = node->next_velocity;
           grad_vp += outerProduct(velocity, weight_grad);
         }
       }
@@ -278,7 +326,7 @@ void Grid::update_particle_velocities(float alpha) {
     for (int dest_i = particle->i_lo; dest_i < particle->i_hi; ++dest_i) {
       for (int dest_j = particle->j_lo; dest_j < particle->j_hi; ++dest_j) {
         for (int dest_k = particle->k_lo; dest_k < particle->k_hi; ++dest_k) {
-          GridNode *dest = nodes[dest_i][dest_j][dest_k];
+          GridNode *dest = node_map[ivec3(dest_i, dest_j, dest_k)];
           float weight = particle->b_spline_at(dest_i, dest_j, dest_k);
           v_pic += dest->next_velocity * weight;
           v_flip += (dest->next_velocity - dest->velocity) * weight;

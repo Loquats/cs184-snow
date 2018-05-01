@@ -206,9 +206,9 @@ int main(int argc, char **argv)
 
   glGetError(); // pull and ignore unhandled errors like GL_INVALID_ENUM
 
-  size_t dim_x = 4;
-  size_t dim_y = 5;
-  size_t dim_z = 6;
+  size_t dim_x = 150;
+  size_t dim_y = 150;
+  size_t dim_z = 150;
   float h = 1.0;
   Grid* grid = new Grid(dim_x, dim_y, dim_z, h);
 
@@ -216,7 +216,7 @@ int main(int argc, char **argv)
   snowsim->loadGrid(grid);
 
   //todo define object schemas and shit and find way to load
-  int num_particles = 100;
+  int num_particles = 2;
   float radius = 2.0;
   createSphereUniformParticles(grid, num_particles, radius);
   vector<CollisionObject *> objects;

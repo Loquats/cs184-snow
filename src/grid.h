@@ -5,6 +5,11 @@
 #include <vector>
 #include "particle.h"
 #include "collision/collisionObject.h"
+#include <unordered_map>
+
+#define P1 73856093
+#define P2 19349663
+#define P3 83492791
 
 using namespace std;
 using namespace glm;
@@ -19,31 +24,45 @@ struct GridNode {
 	vector<Particle *> particles;
 };
 
+struct KeyFuncs
+{
+    inline size_t operator()(const ivec3& k)const
+    {
+        return k.x * P1 ^ k.y * P2 ^ k.z * P3;
+    }
+
+    inline bool operator()(const ivec3& a, const ivec3& b)const
+    {
+        return a.x == b.x && a.y == b.y && a.z == b.z;
+    }
+};
+
 class Grid {
 public:
 
   int dim_x, dim_y, dim_z;
   float h;
+  bool first_step;
 	Grid(int dim_x, int dim_y, int dim_z, float grid_h): h(grid_h) {
         this->dim_x = dim_x;
         this->dim_y = dim_y;
         this->dim_z = dim_z;
         first_step = true;
-		nodes = vector<vector<vector<GridNode *> > >(dim_x);
-		for (int i = 0; i < dim_x; ++i) {
-			nodes[i] = vector<vector<GridNode *> >(dim_y);
-			for (int j = 0; j < dim_y; ++j) {
-				nodes[i][j] = vector<GridNode *>(dim_z);
-				for (int k = 0; k < dim_z; ++k) {
-					nodes[i][j][k] = new GridNode();
-					nodes[i][j][k]->index = vec3(i, j, k);
-				}
-			}
-		}
+//		nodes = vector<vector<vector<GridNode *> > >(dim_x);
+//		for (int i = 0; i < dim_x; ++i) {
+//			nodes[i] = vector<vector<GridNode *> >(dim_y);
+//			for (int j = 0; j < dim_y; ++j) {
+//				nodes[i][j] = vector<GridNode *>(dim_z);
+//				for (int k = 0; k < dim_z; ++k) {
+//					nodes[i][j][k] = new GridNode();
+//					nodes[i][j][k]->index = vec3(i, j, k);
+//				}
+//			}
+//		}
 	};
-    vector<vector<vector<GridNode *> > > nodes; // eventually should probably make this private
+//    vector<vector<vector<GridNode *> > > nodes; // eventually should probably make this private
+    unordered_map<ivec3, GridNode *, KeyFuncs, KeyFuncs> node_map;
 	vector<Particle *> all_particles;
-	bool first_step;
 
 	void resetGrid();
 	void loadParticles(vector<Particle *> particles) { this->all_particles = particles; };
