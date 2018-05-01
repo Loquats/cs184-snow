@@ -28,7 +28,6 @@ void Grid::resetGrid() {
     // TODO: figure this out
     ivec3 index = glm::floor(particle->position); 
     nodes[index.x][index.y][index.z]->particles.push_back(particle);
-    particle->velocity = vec3(0.0);
     particle->compute_neighborhood_bounds(dim_x, dim_y, dim_z, h);
     particle->compute_b_spline_grad(h);
   }
