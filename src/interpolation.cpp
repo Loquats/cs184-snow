@@ -10,9 +10,9 @@ float sgn(float x) {
 float N_func(float x) {
 	float abs_x = abs(x);
 	if (abs_x < 1) {
-		return 0.5 * pow(abs_x, 3) - pow(x, 2) + 2.0 / 3.0;
+		return 0.5 * abs_x * abs_x * abs_x - x * x + 2.0 / 3.0;
 	} else if (abs_x < 2) {
-		return -1.0 / 6.0 * pow(abs_x, 3) + pow(x, 2) - 2.0 * abs_x + 4.0 / 3.0;
+		return -1.0 / 6.0 * abs_x * abs_x * abs_x + x * x - 2.0 * abs_x + 4.0 / 3.0;
 	} else {
 		return 0;
 	}
@@ -20,10 +20,11 @@ float N_func(float x) {
 
 float N_func_derivative(float x) {
 	float abs_x = abs(x);
+	float sign = sgn(x);
 	if (abs_x < 1) {
-		return 1.5 * x * x * sgn(x) - 2 * x;
+		return 1.5 * x * x * sign - 2 * x;
 	} else if (abs_x < 2) {
-		return -0.5 * x * x * sgn(x) + 2 * x - 2 * sgn(x);
+		return -0.5 * x * x * sign + 2 * x - 2 * sign;
 	} else {
 		return 0;
 	}
