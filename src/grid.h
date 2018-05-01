@@ -5,6 +5,7 @@
 #include <vector>
 #include "particle.h"
 #include "collision/collisionObject.h"
+#include <unordered_map>
 
 using namespace std;
 using namespace glm;
@@ -17,6 +18,19 @@ struct GridNode {
 	vec3 next_velocity; // for part 4, 5, 6
 	vec3 force;
 	vector<Particle *> particles;
+};
+
+struct KeyFuncs
+{
+    size_t operator()(const ivec3& k)const
+    {
+        return std::hash<int>()(k.x) ^ std::hash<int>()(k.y) ^ std::hash<int>()(k.z);
+    }
+
+    bool operator()(const ivec3& a, const ivec3& b)const
+    {
+        return a.x == b.x && a.y == b.y && a.z == b.z;
+    }
 };
 
 class Grid {
@@ -34,14 +48,15 @@ public:
 			nodes[i] = vector<vector<GridNode *> >(dim_y);
 			for (int j = 0; j < dim_y; ++j) {
 				nodes[i][j] = vector<GridNode *>(dim_z);
-				for (int k = 0; k < dim_z; ++k) {
-					nodes[i][j][k] = new GridNode();
-					nodes[i][j][k]->index = vec3(i, j, k);
-				}
+//				for (int k = 0; k < dim_z; ++k) {
+//					nodes[i][j][k] = new GridNode();
+//					nodes[i][j][k]->index = vec3(i, j, k);
+//				}
 			}
 		}
 	};
     vector<vector<vector<GridNode *> > > nodes; // eventually should probably make this private
+    unordered_map<ivec3, GridNode *, KeyFuncs, KeyFuncs> map;
 	vector<Particle *> all_particles;
 	bool first_step;
 
