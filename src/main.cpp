@@ -218,7 +218,7 @@ int main(int argc, char **argv)
   glm::mat4 model;
   // model = glm::scale(model, glm::vec3(scale, scale, -scale));
   // cout << glm::to_string(model);
-  model = glm::translate(model, glm::vec3(-float(dim_x)/2, -float(dim_y)/2, -float(dim_z)*1.5));
+  model = glm::translate(model, glm::vec3(-float(dim_x)/2, -float(dim_y)/2, -float(dim_z)*1.8));
 
   //todo define object schemas and shit and find way to load
   int num_particles = 1000;
@@ -233,13 +233,26 @@ int main(int argc, char **argv)
   vec4 ground_color = vec4(0.3f, 0.3f, 0.3f, 1.0f);
   vec3 origin(0, 0, 0);
   vec3 axis_x(dim_x, 0, 0);
-  vec3 axis_y(0, 0, dim_z);
-  Rectangle* ground_rect = new Rectangle(origin, axis_x, axis_y, 0.2, model, ground_color);
+  vec3 axis_y(0, dim_y, 0);
+  vec3 axis_z(0, 0, dim_z);
+  Rectangle* ground_rect = new Rectangle(origin, axis_x, axis_z, 0.2, model, ground_color);
   objects.push_back(ground_rect);
+
+  vec4 transparent = vec4(1, 1, 1, 0);
+  Rectangle* wall_rect1 = new Rectangle(origin, axis_x, axis_y, 0.2, model, transparent);
+  Rectangle* wall_rect2 = new Rectangle(origin, axis_y, axis_z, 0.2, model, transparent);
+
+  Rectangle* wall_rect3 = new Rectangle(axis_x, axis_y, axis_z, 0.2, model, transparent);
+  Rectangle* wall_rect4 = new Rectangle(axis_y, axis_x, axis_z, 0.2, model, transparent);
+  objects.push_back(wall_rect1);
+  objects.push_back(wall_rect2);
+  objects.push_back(wall_rect3);
+  objects.push_back(wall_rect4);
+
 
   // Make the wedge
   vec4 wedge_color = vec4(0.5f, 0.5f, 0.5f, 1.0f);
-  vec3 corner(0.5*dim_x, 0.45*dim_y, 0.1*dim_z);
+  vec3 corner(0.5*dim_x, 0.35*dim_y, 0.1*dim_z);
   vec3 top_edge(0, 0, 0.8 * dim_z);
   vec3 edge1(0.15*dim_x, -0.15*dim_y, 0);
   vec3 edge2(-0.15*dim_x, -0.15*dim_y, 0);
