@@ -202,7 +202,7 @@ void Grid::compute_grid_velocities(float delta_t, vector<CollisionObject *> *col
         vec3 position = node->index * h;
         vec3 next_position = position + node->velocity * delta_t;
         for (CollisionObject* co : *collision_objects) {
-          node->next_velocity = co->collide(position, next_position, node->next_velocity);
+          // node->next_velocity = co->collide(position, next_position, node->next_velocity);
         }
       }
     }
