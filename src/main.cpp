@@ -203,8 +203,10 @@ int main(void)
   snowsim->init(&camera, &baseshader);
   snowsim->loadCollisionObjects(&objects);
 
+  int iter = 0;
   while (!glfwWindowShouldClose(window))
     {
+      cout << "Iteration " << iter << " ";
       cameraInputTick();
 
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -215,7 +217,7 @@ int main(void)
       glfwPollEvents();
 
       glfwSwapBuffers(window);
-
+      ++iter;
     }
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);

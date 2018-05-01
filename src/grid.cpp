@@ -23,12 +23,13 @@ void Grid::resetGrid() {
           }
       }
   }
-  for (Particle *p : all_particles) {
+  for (Particle *particle : all_particles) {
     // I'm not 100% sure rounding is the right thing to do, but the b-spline is centered on the grid index itself so I think it's right
     // Gonna use floor for now to be consistent with the rest of the code
     // TODO: figure this out
-    ivec3 index = glm::floor(p->position); 
-    nodes[index.x][index.y][index.z]->particles.push_back(p);
+    ivec3 index = glm::floor(particle->position); 
+    nodes[index.x][index.y][index.z]->particles.push_back(particle);
+    particle->velocity = vec3(0.0);
   }
 }
 
@@ -40,49 +41,44 @@ void Grid::simulate(float delta_t, vector<vec3> external_accelerations, vector<C
     float theta_s = 7.5e-3;
     float alpha = 0.95;
 
+    resetGrid();
+    particle_to_grid();                       // Step 1.
+    if (first_step) {
+        compute_particle_volumes();           // Step 2.
+        first_step = false;
+    }
+    compute_F_hat_Ep(delta_t);                // (Step 3.)
+    compute_grid_forces(mu_0, lambda_0, xi);  // Step 3.
+    // apply_ext_accelerations(external_accelerations);     // not a step
+    compute_grid_velocities(delta_t, collision_objects);    // Step 4.
+                                                            // Step 5: grid-base collisions (skipped)
+    // compute_time_integration();                          // Step 6: disabled b/c do not use semi-implicit integratino
+    update_deformation_gradients(theta_c, theta_s, delta_t);// Step 7.
+    update_particle_velocities(alpha);                      // Step 8.
+
+    // the code below could get wrapped up in a method, i just didn't bother since it's sorta in test still
+    // also kinda unsure of whether we're supposed to apply accelerations on the grid or the particles
+
+    // External accelerations (eg. gravity) applied on all particles
     vec3 total_acc = vec3(0.0);
     for (vec3 acc : external_accelerations) {
       total_acc += acc;
     }
-
-    resetGrid();
-//    particle_to_grid();
-//    if (first_step) {
-//        compute_particle_volumes();
-//        first_step = false;
-//    }
-//    compute_F_hat_Ep(delta_t);
-//    compute_grid_forces(mu_0, lambda_0, xi);
-//    apply_ext_accelerations(external_accelerations);
-//    compute_grid_velocities(delta_t, collision_objects);
-//    compute_time_integration();
-//    update_deformation_gradients(theta_c, theta_s, delta_t);
-//    update_particle_velocities(alpha);
-
-    // the code below could get wrapped up in a method, i just didn't bother since it's sorta in test still
-    // also kinda unsure of whether we're supposed to apply accelerations on the grid or the particles
     for (int i = 0; i < dim_x; ++i) {
         for (int j = 0; j < dim_y; ++j) {
             for (int k = 0; k < dim_z; ++k) {
-                for (Particle* particle : nodes[i][j][k]->particles) {  // key location
+                for (Particle* particle : nodes[i][j][k]->particles) {
                     particle->velocity += total_acc * delta_t;
                 }
             }
         }
     }
 
+    // Step 9.
     compute_particle_collisions(delta_t, collision_objects);
 
-    for (int i = 0; i < dim_x; ++i) {
-      for (int j = 0; j < dim_y; ++j) {
-        for (int k = 0; k < dim_z; ++k) {
-          for (Particle* particle : nodes[i][j][k]->particles) {  // key location
-            particle->position += particle->velocity * delta_t;
-          }
-        }
-      }
-    }
-
+    // Step 10.
+    update_particle_positions(delta_t);
 }
 
 /*
@@ -93,7 +89,7 @@ void Grid::particle_to_grid() {
   for (int i = 0; i < dim_x; ++i) {
     for (int j = 0; j < dim_y; ++j) {
       for (int k = 0; k < dim_z; ++k) {
-        for (Particle *particle : nodes[i][j][k]->particles) {    // key location
+        for (Particle *particle : nodes[i][j][k]->particles) {   
           vec3 pos = particle->position;
           int i_lo = std::max((int) ceil(pos.x / h - 2), 0);
           int i_hi = std::min((int) floor(pos.x / h + 2) + 1, (int) dim_x);
@@ -116,7 +112,7 @@ void Grid::particle_to_grid() {
   }
 
 
-//    for (Particle* particle : all_particles) {	// key location
+//    for (Particle* particle : all_particles) {
 //      vec3 pos = particle->position;
 //      int i_lo = std::max((int) ceil(pos.x / h - 2), 0);
 //      int i_hi = std::min((int) floor(pos.x / h + 2) + 1, (int) dim_x);
@@ -296,6 +292,7 @@ void Grid::compute_grid_velocities(float delta_t, vector<CollisionObject *> *col
  * Step 6: time integration
  */
 void Grid::compute_time_integration() {
+  return;
   for (int i = 0; i < dim_x; ++i) {
     for (int j = 0; j < dim_y; ++j) {
       for (int k = 0; k < dim_z; ++k) {
@@ -392,7 +389,7 @@ void Grid::update_particle_velocities(float alpha) {
               }
             }
           }
-          particle->velocity = (1.f - alpha) * v_pic + alpha * v_flip;
+          particle->velocity += (1.f - alpha) * v_pic + alpha * v_flip;
         }
       }
     }
@@ -416,6 +413,22 @@ void Grid::compute_particle_collisions(float delta_t, vector<CollisionObject *> 
     }
   }
 }
+
+/*
+ * Step 10: Update particle positions
+ */
+void Grid::update_particle_positions(float delta_t) {
+  for (int i = 0; i < dim_x; ++i) {
+    for (int j = 0; j < dim_y; ++j) {
+      for (int k = 0; k < dim_z; ++k) {
+        for (Particle* particle : nodes[i][j][k]->particles) {
+          particle->position += particle->velocity * delta_t;
+        }
+      }
+    }
+  }
+}
+
 
 ///////////////////////////////
 

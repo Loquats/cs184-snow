@@ -99,6 +99,11 @@ public:
 	 * Step 9: Particle-based collisions
 	 */
 	void compute_particle_collisions(float delta_t, vector<CollisionObject *> *objects);
+
+	/*
+	 * Step 10: Update particle positions
+	 */
+	void update_particle_positions(float delta_t);
 };
 
 #endif /* GRID_H */
