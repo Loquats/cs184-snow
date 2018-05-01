@@ -30,23 +30,19 @@ float N_func_derivative(float x) {
 	}
 }
 
-float b_spline(glm::vec3 particle_pos, glm::vec3 grid_index, float h) {
-	// ie. particle_pos / h - grid_index
-	glm::vec3 scaled = (particle_pos - h * grid_index) / h;
+float b_spline(glm::vec3 scaled) {
 	return N_func(scaled.x) * N_func(scaled.y) * N_func(scaled.z);
 }
 
-glm::vec3 b_spline_components(glm::vec3 particle_pos, glm::vec3 grid_index, float h) {
-	glm::vec3 scaled = (particle_pos - h * grid_index) / h;
+glm::vec3 b_spline_components(glm::vec3 scaled) {
 	return glm::vec3(N_func(scaled.x), N_func(scaled.y), N_func(scaled.z));
 }
 
 /*
 * Using that motherfuckin chain rule, ye
 */
-glm::vec3 b_spline_grad(glm::vec3 particle_pos, glm::vec3 grid_index, float h) {
-	glm::vec3 scaled = (particle_pos - h * grid_index) / h;
-	glm::vec3 components = b_spline_components(particle_pos, grid_index, h);
+glm::vec3 b_spline_grad(glm::vec3 scaled, float h) {
+	glm::vec3 components = b_spline_components(scaled);
 	float dx = components.y * components.z * N_func_derivative(scaled.x) / h;
 	float dy = components.x * components.z * N_func_derivative(scaled.y) / h;
 	float dz = components.x * components.y * N_func_derivative(scaled.z) / h;

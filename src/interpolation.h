@@ -9,10 +9,10 @@ float N_func(float x);
 
 float N_func_derivative(float x);
 
-float b_spline(glm::vec3 particle_pos, glm::vec3 grid_index, float h);
+float b_spline(glm::vec3 scaled);
 
-glm::vec3 b_spline_components(glm::vec3 particle_pos, glm::vec3 grid_index, float h);
+glm::vec3 b_spline_components(glm::vec3 scaled);
 
-glm::vec3 b_spline_grad(glm::vec3 particle_pos, glm::vec3 grid_index, float h);
+glm::vec3 b_spline_grad(glm::vec3 scaled, float h);
 
 #endif /* INTERPOLATION_H */

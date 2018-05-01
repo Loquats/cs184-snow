@@ -50,10 +50,9 @@ public:
     for (int dest_i = i_lo; dest_i < i_hi; ++dest_i) {
       for (int dest_j = j_lo; dest_j < j_hi; ++dest_j) {
         for (int dest_k = k_lo; dest_k < k_hi; ++dest_k) {
-          float weight = b_spline(position, glm::vec3(dest_i, dest_j, dest_k), h);
-          glm::vec3 weight_grad = b_spline_grad(position, glm::vec3(dest_i, dest_j, dest_k), h);
-          b_spline_val[dest_i - i_lo][dest_j - j_lo][dest_k - k_lo] = weight;
-          b_spline_grad_val[dest_i - i_lo][dest_j - j_lo][dest_k - k_lo] = weight_grad;
+          glm::vec3 scaled = position / h - glm::vec3(dest_i, dest_j, dest_k);
+          b_spline_val[dest_i - i_lo][dest_j - j_lo][dest_k - k_lo] = b_spline(scaled);
+          b_spline_grad_val[dest_i - i_lo][dest_j - j_lo][dest_k - k_lo] = b_spline_grad(scaled, h);
         }
       }
     }
