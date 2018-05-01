@@ -8,7 +8,7 @@
 class Particle {
 public:
   Particle(glm::vec3 position, float mass): 
-    position(position), mass(mass) {};
+    position(position), mass(mass), velocity(glm::vec3(0)) {};
 
   glm::vec3 position;
   glm::vec3 velocity;
