@@ -17,11 +17,10 @@
 #include "collision/rectangle.h"
 #include "misc/sampling.h"
 
-
-int SCR_WIDTH = 1200;
-int SCR_HEIGHT = 800;
+int SCR_WIDTH = 800;
+int SCR_HEIGHT = 600;
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 7.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -206,19 +205,26 @@ int main(int argc, char **argv)
 
   glGetError(); // pull and ignore unhandled errors like GL_INVALID_ENUM
 
-  size_t dim_x = 4;
-  size_t dim_y = 5;
-  size_t dim_z = 6;
+  size_t dim_x = 50;
+  size_t dim_y = 50;
+  size_t dim_z = 50;
   float h = 1.0;
   Grid* grid = new Grid(dim_x, dim_y, dim_z, h);
 
   snowsim = new SnowSimulator(frames_per_second, length);
   snowsim->loadGrid(grid);
 
+  float scale = 1.0 / std::max(dim_x, dim_y);
+  glm::mat4 model;
+  // model = glm::scale(model, glm::vec3(scale, scale, -scale));
+  // cout << glm::to_string(model);
+  model = glm::translate(model, glm::vec3(-float(dim_x)/2, -float(dim_y)/2, -float(dim_z)*1.5));
+
   //todo define object schemas and shit and find way to load
-  int num_particles = 100;
-  float radius = 2.0;
+  int num_particles = 1000;
+  float radius = float(dim_x) / 4;
   createSphereUniformParticles(grid, num_particles, radius);
+  // createTwoParticles(grid);
   vector<CollisionObject *> objects;
 
   // Make the ground plane
@@ -230,12 +236,10 @@ int main(int argc, char **argv)
   objects.push_back(p);
 
   // make the wedge
-  glm::mat4 model;
-  model = glm::translate(model, glm::vec3(-float(grid_dim.x)/2, -float(grid_dim.y)/2, -float(grid_dim.z)/2));
-  vec3 corner(2, 2, 1);
-  vec3 top_edge(0, 0, 4);
-  vec3 edge1(1, -1, 0);
-  vec3 edge2(-1, -1, 0);
+  vec3 corner(0.5*dim_x, 0.3*dim_y, 0.1*dim_z);
+  vec3 top_edge(0, 0, 0.8 * dim_z);
+  vec3 edge1(0.25*dim_x, -0.25*dim_y, 0);
+  vec3 edge2(-0.25*dim_x, -0.25*dim_y, 0);
   float mu = 0.5;
   Rectangle* wedge_rect1 = new Rectangle(corner, top_edge, edge1, mu, model);
   Rectangle* wedge_rect2 = new Rectangle(corner, top_edge, edge2, mu, model);
@@ -245,7 +249,7 @@ int main(int argc, char **argv)
   glm::vec4 hot_pink(1.0f, 0.5f, 1.0f, 1.0f);
   baseshader.use();
   baseshader.setVec4("in_color", hot_pink);
-  snowsim->init(&camera, &baseshader);
+  snowsim->init(&camera, &baseshader, model);
   snowsim->loadCollisionObjects(&objects);
 
   int frame_counter = 0;

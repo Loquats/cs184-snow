@@ -21,7 +21,7 @@ public:
   SnowSimulator(int frames_per_sec, int length);
   ~SnowSimulator();
 
-  void init(Camera *camera, Shader *shader);
+  void init(Camera *camera, Shader *shader, glm::mat4 model);
 
   void loadGrid(struct Grid *grid);
 //  void loadClothParameters(ClothParameters *cp);
@@ -55,6 +55,8 @@ private:
   int frames_per_sec = 30;
   int length;
   float delta_t = 1e-5;
+
+  glm::mat4 model;
 
   glm::vec3 gravity = glm::vec3(0.0f, -9.8f, 0.0f);
 
