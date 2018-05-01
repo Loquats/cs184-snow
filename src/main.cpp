@@ -195,6 +195,8 @@ int main(int argc, char **argv)
   setGlfwCallbacks();
 
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  n_func_init();
+  n_func_derivative_init();
 
 
   // NOTE: OpenGL error checks have been omitted for brevity

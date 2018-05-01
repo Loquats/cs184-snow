@@ -15,4 +15,8 @@ glm::vec3 b_spline_components(glm::vec3 scaled);
 
 glm::vec3 b_spline_grad(glm::vec3 scaled, float h);
 
+void n_func_init();
+
+void n_func_derivative_init();
+
 #endif /* INTERPOLATION_H */
