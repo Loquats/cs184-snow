@@ -11,9 +11,9 @@ using namespace Eigen;
 using namespace glm;
 
 void Grid::resetGrid() {
-  for (int i = 0; i < dim_x; ++i) {
-      for (int j = 0; j < dim_y; ++j) {
-          for (int k = 0; k < dim_z; ++k) {
+  for (int i = 0; i < grid_x; ++i) {
+      for (int j = 0; j < grid_y; ++j) {
+          for (int k = 0; k < grid_z; ++k) {
               nodes[i][j][k]->mass = 0;
               nodes[i][j][k]->velocity = vec3(0.0);
               nodes[i][j][k]->next_velocity = vec3(0.0);
@@ -26,9 +26,9 @@ void Grid::resetGrid() {
     // I'm not 100% sure rounding is the right thing to do, but the b-spline is centered on the grid index itself so I think it's right
     // Gonna use floor for now to be consistent with the rest of the code
     // TODO: figure this out
-    ivec3 index = glm::floor(particle->position); 
+    ivec3 index = glm::floor(particle->position/h);
     nodes[index.x][index.y][index.z]->particles.push_back(particle);
-    particle->compute_neighborhood_bounds(dim_x, dim_y, dim_z, h);
+    particle->compute_neighborhood_bounds(grid_x, grid_y, grid_z, h);
     particle->compute_b_spline_grad(h);
   }
 }
@@ -95,9 +95,9 @@ void Grid::particle_to_grid() {
   }
 
   // Normalize grid velocity by its mass all at once
-  for (int i = 0; i < dim_x; ++i) {
-    for (int j = 0; j < dim_y; ++j) {
-      for (int k = 0; k < dim_z; ++k) {
+  for (int i = 0; i < grid_x; ++i) {
+    for (int j = 0; j < grid_y; ++j) {
+      for (int k = 0; k < grid_z; ++k) {
         if (nodes[i][j][k]->mass > 0) {
           nodes[i][j][k]->velocity /= nodes[i][j][k]->mass;
         }
@@ -132,7 +132,6 @@ void Grid::compute_particle_volumes() {
 *   to save one full iteration over the grid cells and Particle* pointers?
 */
 void Grid::compute_F_hat_Ep(float delta_t) {
-  float h3 = pow(h, 3);
   for (Particle *particle : all_particles) {
     mat3 sum = mat3(0.0f);
     for (int dest_i = particle->i_lo; dest_i < particle->i_hi; ++dest_i) {
@@ -153,7 +152,6 @@ void Grid::compute_F_hat_Ep(float delta_t) {
 * Step 3: compute force for each grid cell
 */
 void Grid::compute_grid_forces(float mu_0, float lambda_0, float xi) {
-  float h3 = pow(h, 3);
   for (Particle *particle : all_particles) {
     float volume = particle->volume;
     mat3 sigma_p = psi_derivative(mu_0, lambda_0, xi, particle) * transpose(particle->deformation_grad_E);
@@ -175,9 +173,9 @@ void Grid::compute_grid_forces(float mu_0, float lambda_0, float xi) {
  * Apply external forces, e.g. gravity
  */
 void Grid::apply_ext_accelerations(vector<vec3> external_accelerations) {
-  for (int i = 0; i < dim_x; ++i) {
-    for (int j = 0; j < dim_y; ++j) {
-      for (int k = 0; k < dim_z; ++k) {
+  for (int i = 0; i < grid_x; ++i) {
+    for (int j = 0; j < grid_y; ++j) {
+      for (int k = 0; k < grid_z; ++k) {
         // Explicit update: just copy it all over
         GridNode* node = nodes[i][j][k];
         for (vec3 acc : external_accelerations) {
@@ -192,9 +190,9 @@ void Grid::apply_ext_accelerations(vector<vec3> external_accelerations) {
  * Step 4 and 5: update grid node velocities, do collisions
  */
 void Grid::compute_grid_velocities(float delta_t, vector<CollisionObject *> *collision_objects) {
-  for (int i = 0; i < dim_x; ++i) {
-    for (int j = 0; j < dim_y; ++j) {
-      for (int k = 0; k < dim_z; ++k) {
+  for (int i = 0; i < grid_x; ++i) {
+    for (int j = 0; j < grid_y; ++j) {
+      for (int k = 0; k < grid_z; ++k) {
         GridNode* node = nodes[i][j][k];
         node->next_velocity = node->velocity;
         if (node->mass > 0) {
@@ -215,9 +213,9 @@ void Grid::compute_grid_velocities(float delta_t, vector<CollisionObject *> *col
  */
 void Grid::compute_time_integration() {
   return;
-  for (int i = 0; i < dim_x; ++i) {
-    for (int j = 0; j < dim_y; ++j) {
-      for (int k = 0; k < dim_z; ++k) {
+  for (int i = 0; i < grid_x; ++i) {
+    for (int j = 0; j < grid_y; ++j) {
+      for (int k = 0; k < grid_z; ++k) {
         // Explicit update: no need to do anything. next_velocity and velocity are both used in the next part
 //        GridNode* node = nodes[i][j][k];
 //        node->velocity = node->next_velocity;

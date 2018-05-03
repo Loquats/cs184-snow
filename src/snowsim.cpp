@@ -46,9 +46,9 @@ void SnowSimulator::init(Camera *camera, Shader *shader, glm::mat4 model) {
   this->camera = camera;
   this->shader = shader;
   this->modeltoworld = model;
-  int x = grid->dim_x;
-  int y = grid->dim_y;
-  int z = grid->dim_z;
+  int x = grid->grid_x;
+  int y = grid->grid_y;
+  int z = grid->grid_z;
 
   int num_lines = (z + 1) * ((x + 1) + (y + 1)) + ((x + 1) * (y+1));
   int num_vertices = num_lines * 2;
@@ -58,7 +58,9 @@ void SnowSimulator::init(Camera *camera, Shader *shader, glm::mat4 model) {
   for (int z_coord = 0; z_coord <= z; ++z_coord) {
     for (int x_coord = 0; x_coord <= x; ++x_coord) {
       glm::vec3 bottom(float(x_coord), 0, float(z_coord));
-      glm::vec3 top(float(x_coord), grid->dim_y, float(z_coord));
+      bottom *= grid->h;
+      glm::vec3 top(float(x_coord), grid->grid_y, float(z_coord));
+      top *= grid->h;
       grid_vertices[t + 0] = bottom.x;
       grid_vertices[t + 1] = bottom.y;
       grid_vertices[t + 2] = bottom.z;
@@ -70,9 +72,11 @@ void SnowSimulator::init(Camera *camera, Shader *shader, glm::mat4 model) {
     }
 
     for (int y_coord = 0; y_coord <= y; ++y_coord) {
-      // lines from x=0 to x=dim_z at z=0
+      // lines from x=0 to x=grid_z at z=0
       glm::vec3 bottom(0.0f, float(y_coord), float(z_coord));
-      glm::vec3 top(grid->dim_x, float(y_coord), float(z_coord));
+      bottom *= grid->h;
+      glm::vec3 top(grid->grid_x, float(y_coord), float(z_coord));
+      top *= grid->h;
       grid_vertices[t + 0] = bottom.x;
       grid_vertices[t + 1] = bottom.y;
       grid_vertices[t + 2] = bottom.z;
@@ -85,9 +89,11 @@ void SnowSimulator::init(Camera *camera, Shader *shader, glm::mat4 model) {
   }
   for (int x_coord = 0; x_coord <= x; ++x_coord) {
     for (int y_coord = 0; y_coord <= y; ++y_coord) {
-      // lines from x=0 to x=dim_z at z=0
+      // lines from x=0 to x=grid_z at z=0
       glm::vec3 front(float(x_coord), float(y_coord), 0.0);
-      glm::vec3 back(float(x_coord), float(y_coord), grid->dim_z);
+      front *= grid->h;
+      glm::vec3 back(float(x_coord), float(y_coord), grid->grid_z);
+      back *= grid->h;
       grid_vertices[t + 0] = front.x;
       grid_vertices[t + 1] = front.y;
       grid_vertices[t + 2] = front.z;
@@ -187,7 +193,7 @@ void SnowSimulator::drawContents() {
   // camera/view transformation
   glm::mat4 view = camera->GetViewMatrix();
   shader->setMat4("view", view);
-//  drawGrid(glm::vec4(0.8, 0.8, 0.8, 1.0));
+//  drawGrid(glm::vec4(0.8, 0.8, 0.8, 0.5));
   drawParticles(glm::vec4(0.7, 0.7, 0.7, 0.7));
 //  drawGridForces();
   drawParticleForces();
@@ -200,7 +206,7 @@ void SnowSimulator::drawGrid(glm::vec4 color) {
   glBindVertexArray(grid_VAO);
   shader->setVec4("in_color", color);
   shader->setMat4("model", modeltoworld);
-  int num_vertices = (grid->dim_x + 1) * (grid->dim_y + 1) * (grid->dim_z + 1) * 2;
+  int num_vertices = (grid->grid_x + 1) * (grid->grid_y + 1) * (grid->grid_z + 1) * 2;
 
   glDrawArrays(GL_LINES, 0, num_vertices * 3);
 }
@@ -222,15 +228,15 @@ void SnowSimulator::drawParticles(glm::vec4 color) {
 void SnowSimulator::drawGridForces() {
 
   float ARROW_LENGTH_SCALAR = 2;
-  int num_arrows = grid->dim_x * grid->dim_y * grid->dim_z;
+  int num_arrows = grid->grid_x * grid->grid_y * grid->grid_z;
   int num_vertices = num_arrows * 2;
   float grid_force_vertices[num_vertices * 3];
   memset(grid_force_vertices, 0, num_vertices * 3 * sizeof(float));
 
   int counter = 0;
-  for (int i = 0; i < grid->dim_x; ++i) {
-    for (int j = 0; j < grid->dim_y; ++j) {
-      for (int k = 0; k < grid->dim_z; ++k) {
+  for (int i = 0; i < grid->grid_x; ++i) {
+    for (int j = 0; j < grid->grid_y; ++j) {
+      for (int k = 0; k < grid->grid_z; ++k) {
         vec3* force = &grid->nodes[i][j][k]->force;
         if (force->x == 0 and force->y == 0 and force->z == 0) {
           continue;

@@ -5,6 +5,7 @@
 #include <vector>
 #include "particle.h"
 #include "collision/collisionObject.h"
+#include <cassert>
 
 using namespace std;
 using namespace glm;
@@ -22,19 +23,26 @@ struct GridNode {
 class Grid {
 public:
 
+  int grid_x, grid_y, grid_z;
   int dim_x, dim_y, dim_z;
   float h;
 	Grid(int dim_x, int dim_y, int dim_z, float grid_h): h(grid_h) {
-        this->dim_x = dim_x;
-        this->dim_y = dim_y;
-        this->dim_z = dim_z;
-        first_step = true;
-		nodes = vector<vector<vector<GridNode *> > >(dim_x);
-		for (int i = 0; i < dim_x; ++i) {
-			nodes[i] = vector<vector<GridNode *> >(dim_y);
-			for (int j = 0; j < dim_y; ++j) {
-				nodes[i][j] = vector<GridNode *>(dim_z);
-				for (int k = 0; k < dim_z; ++k) {
+
+		bool divisible = fmod(dim_x, h) == 0 and fmod(dim_y, h) == 0 and fmod(dim_z, h) == 0;
+		assert(divisible);
+		this->dim_x = dim_x;
+		this->dim_y = dim_y;
+		this->dim_z = dim_z;
+		this->grid_x = int(dim_x / h);
+		this->grid_y = int(dim_y / h);
+		this->grid_z = int(dim_z / h);
+		first_step = true;
+		nodes = vector<vector<vector<GridNode *> > >(grid_x);
+		for (int i = 0; i < grid_x; ++i) {
+			nodes[i] = vector<vector<GridNode *> >(grid_y);
+			for (int j = 0; j < grid_y; ++j) {
+				nodes[i][j] = vector<GridNode *>(grid_z);
+				for (int k = 0; k < grid_z; ++k) {
 					nodes[i][j][k] = new GridNode();
 					nodes[i][j][k]->index = vec3(i, j, k);
 				}

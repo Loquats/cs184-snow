@@ -8,9 +8,9 @@
 using namespace glm;
 
 void createOneToOneParticles(Grid *grid) {
-    for (int i = 0; i < grid->dim_x; ++i) {
-        for (int j = 0; j < grid->dim_y; ++j) {
-            for (int k = 0; k < grid->dim_z; ++k) {
+    for (int i = 0; i < grid->grid_x; ++i) {
+        for (int j = 0; j < grid->grid_y; ++j) {
+            for (int k = 0; k < grid->grid_z; ++k) {
                 Particle* a_particle = new Particle(vec3(float(i) + 0.5, float(j) + 0.5, float(k) + 0.5), 10);
                 a_particle->velocity = vec3(0.0);
                 grid->all_particles.push_back(a_particle);
