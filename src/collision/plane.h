@@ -9,15 +9,13 @@
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include "collisionObject.h"
-#include "../shader.h"
 
 using namespace glm;
 
 struct Plane : public CollisionObject {
 public:
-  Plane(vec3 &point_in, vec3 &normal_in, const vec3 dim, float mu)
-      : dim(dim), mu(mu) {
-    worldtomodel = glm::translate(worldtomodel, glm::vec3(float(dim.x)/2, float(dim.y)/2, float(dim.z)/2));
+  Plane(vec3 &point_in, vec3 &normal_in, const vec3 dim, float mu, glm::mat4 worldtomodel, glm::mat4 modeltoworld)
+      : dim(dim), mu(mu), worldtomodel(worldtomodel), modeltoworld(modeltoworld) {
 
     point = vec3(worldtomodel * vec4(point_in, 1.0));
     normal = vec3(worldtomodel * vec4(normal_in, 0.0));
@@ -27,10 +25,10 @@ public:
     vec3 sCross = cross(normal, sParallel);
 
     memset(plane_vertices, 0, num_vertices * 3 * sizeof(float));
-    vec3 p1 = point + 2.0f * sCross;
-    vec3 p2 = point + 2.0f * -sParallel;
-    vec3 p3 = point + 2.0f * sParallel;
-    vec3 p4 = point + 2.0f * -sCross;
+    vec3 p1 = point + 200.0f * sCross;
+    vec3 p2 = point + 200.0f * -sParallel;
+    vec3 p3 = point + 200.0f * sParallel;
+    vec3 p4 = point + 200.0f * -sCross;
 
     plane_vertices[0] = p1.x;
     plane_vertices[1] = p1.y;
@@ -69,6 +67,7 @@ public:
   vec3 dim;
 
   mat4 worldtomodel;
+  mat4 modeltoworld;
 private:
   unsigned int plane_VAO, plane_VBO;
   float mu;

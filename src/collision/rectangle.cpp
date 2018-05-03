@@ -45,7 +45,7 @@ vec3 Rectangle::collide(vec3 position, vec3 next_position, vec3 velocity) {
 void Rectangle::render(Shader *shader) {
   shader->use();
   shader->setVec4("in_color", color);
-  shader->setMat4("model", model);
+  shader->setMat4("model", modeltoworld);
   glBindVertexArray(VAO);
   glDrawArrays(GL_TRIANGLE_FAN, 0, num_vertices);
 }

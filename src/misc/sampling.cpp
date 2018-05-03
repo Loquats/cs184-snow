@@ -21,7 +21,8 @@ void createOneToOneParticles(Grid *grid) {
 }
 
 void createSphereUniformParticles(Grid *grid, int num_particles, float radius) {
-    vec3 grid_center = vec3(grid->dim_x, grid->dim_y, grid->dim_z) *  (grid->h / 2);
+    vec3 grid_center = vec3(grid->dim_x, grid->dim_y, grid->dim_z)/2.0f;
+    grid_center.y += grid->dim_y * 0.2;
     for (int i = 0; i < num_particles; i++) {
         Particle* p = new Particle(grid_center + ballRand(radius), 10);
         p->velocity = vec3(0.0);

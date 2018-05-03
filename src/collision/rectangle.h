@@ -10,13 +10,14 @@ using namespace glm;
 struct Rectangle : public CollisionObject {
 public:
   // input is in model space (0, 0, 0) to (dimx, dimy, dimz)
-  Rectangle(vec3 &origin, vec3 &edge_u, vec3 &edge_v, float mu, mat4 model, vec4 color) 
-    : origin(origin), edge_u(edge_u), edge_v(edge_v), mu(mu), model(model), color(color) {
+  Rectangle(vec3 &in_origin, vec3 &edge_u, vec3 &edge_v, float mu, mat4 model, mat4 worldtomodel, vec4 color)
+    : edge_u(edge_u), edge_v(edge_v), mu(mu), modeltoworld(model), worldtomodel(worldtomodel), color(color) {
       // Check if rectangle is valid: edges must be orthogonal
       if (abs(dot(edge_u, edge_v)) > 0) {
         throw "bad rectangle";
       }
 
+      origin = vec3(worldtomodel * vec4(in_origin, 1.0));
       normal = normalize(cross(edge_u, edge_v));
 
       vec3 point1 = origin + edge_u;
@@ -60,7 +61,8 @@ private:
   const int static num_vertices = 4;
   float vertices[num_vertices * 3];
   unsigned int VAO, VBO;
-  mat4 model;
+  mat4 modeltoworld;
+  mat4 worldtomodel;
   vec4 color;
 };
 
