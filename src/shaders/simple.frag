@@ -6,5 +6,7 @@ out vec4 FragColor;
 
 void main()
 {
+	if (in_color.a < 0.01)
+		discard;
 	FragColor = in_color;
 }

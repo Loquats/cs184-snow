@@ -36,9 +36,7 @@ void Plane::render(Shader *shader) {
   shader->use();
   shader->setVec4("in_color", color);
 
-  glm::mat4 model;
-  model = glm::translate(model, glm::vec3(-float(dim.x)/2, -float(dim.y)/2, -float(dim.z)/2));
-  shader->setMat4("model", model);
+  shader->setMat4("model", modeltoworld);
   glBindVertexArray(plane_VAO);
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }

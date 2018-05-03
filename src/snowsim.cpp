@@ -45,7 +45,7 @@ void SnowSimulator::loadCollisionObjects(vector<CollisionObject *> *objects) { t
 void SnowSimulator::init(Camera *camera, Shader *shader, glm::mat4 model) {
   this->camera = camera;
   this->shader = shader;
-  this->model = model;
+  this->modeltoworld = model;
   int x = grid->dim_x;
   int y = grid->dim_y;
   int z = grid->dim_z;
@@ -187,7 +187,7 @@ void SnowSimulator::drawContents() {
   // camera/view transformation
   glm::mat4 view = camera->GetViewMatrix();
   shader->setMat4("view", view);
-  // drawGrid(glm::vec4(0.8, 0.8, 0.8, 1.0));
+//  drawGrid(glm::vec4(0.8, 0.8, 0.8, 1.0));
   drawParticles(glm::vec4(0.7, 0.7, 0.7, 0.7));
 //  drawGridForces();
   drawParticleForces();
@@ -199,7 +199,7 @@ void SnowSimulator::drawContents() {
 void SnowSimulator::drawGrid(glm::vec4 color) {
   glBindVertexArray(grid_VAO);
   shader->setVec4("in_color", color);
-  shader->setMat4("model", model);
+  shader->setMat4("model", modeltoworld);
   int num_vertices = (grid->dim_x + 1) * (grid->dim_y + 1) * (grid->dim_z + 1) * 2;
 
   glDrawArrays(GL_LINES, 0, num_vertices * 3);
@@ -209,7 +209,7 @@ void SnowSimulator::drawParticles(glm::vec4 color) {
   vector<Particle *>& all_particles = grid->all_particles;
 
   for(Particle* particle : all_particles) {
-    glm::mat4 particle_model = glm::translate(model, particle->position);
+    glm::mat4 particle_model = glm::translate(modeltoworld, particle->position);
     shader->setVec4("in_color", color);
     shader->setMat4("model", particle_model);
     glBindVertexArray(particle_VAO);
@@ -250,7 +250,7 @@ void SnowSimulator::drawGridForces() {
     }
   }
   shader->use();
-  shader->setMat4("model", model);
+  shader->setMat4("model", modeltoworld);
   glBindVertexArray(grid_force_VAO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(grid_force_vertices), grid_force_vertices, GL_DYNAMIC_DRAW);
   glDrawArrays(GL_LINES, 0, num_vertices);
@@ -284,7 +284,7 @@ void SnowSimulator::drawParticleForces() {
     counter += 3;
   }
   shader->use();
-  shader->setMat4("model", model);
+  shader->setMat4("model", modeltoworld);
   glBindVertexArray(particle_velocity_VAO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(particle_velocity_vertices), particle_velocity_vertices, GL_DYNAMIC_DRAW);
   glDrawArrays(GL_LINES, 0, num_vertices);

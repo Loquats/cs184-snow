@@ -21,7 +21,8 @@ void createOneToOneParticles(Grid *grid) {
 }
 
 void createSphereUniformParticles(Grid *grid, int num_particles, float radius) {
-    vec3 grid_center = vec3(grid->dim_x, grid->dim_y + 10, grid->dim_z) *  (grid->h / 2);
+    vec3 grid_center = vec3(grid->dim_x, grid->dim_y, grid->dim_z)/2.0f;
+    grid_center.y += grid->dim_y * 0.15;
     for (int i = 0; i < num_particles; i++) {
         Particle* p = new Particle(grid_center + ballRand(radius), 10);
         p->velocity = vec3(0.0);
@@ -31,14 +32,18 @@ void createSphereUniformParticles(Grid *grid, int num_particles, float radius) {
 }
 
 void createTwoParticles(Grid *grid) {
-    vec3 base(2, 2, 2);
-    Particle* p = new Particle(base + vec3(0.5, 0, 0), 1);
+    vec3 center = vec3(grid->dim_x, grid->dim_y, grid->dim_z)/2.0f;
+    Particle* p = new Particle(center + vec3(5, 0, 0), 1);
     p->velocity = vec3(0.0);
     grid->all_particles.push_back(p);
 
-    Particle* q = new Particle(base + vec3(-0.5, 0, 0), 1);
+    Particle* q = new Particle(center + vec3(-5, 0, 0), 1);
     q->velocity = vec3(0.0);
     grid->all_particles.push_back(q);
+
+    Particle* origin = new Particle(vec3(0.1, 0.1, 0.1), 1);
+    origin->velocity = vec3(0.0);
+    grid->all_particles.push_back(origin);    
 
     grid->resetGrid();
   }

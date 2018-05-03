@@ -55,7 +55,7 @@ private:
   int length;
   float delta_t = 1e-3;
 
-  glm::mat4 model;
+  glm::mat4 modeltoworld;
 
   glm::vec3 gravity = glm::vec3(0.0f, -9.8f, 0.0f);
 
