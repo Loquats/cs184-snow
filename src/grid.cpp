@@ -56,7 +56,7 @@ void Grid::pruneUnusedNodes() {
         node->particles.clear();
     }
 
-    nodes_in_use.clear();
+    cout << "pruning nodes" << endl;
 
     for (Particle *particle : all_particles) {
         ivec3 index = glm::floor(particle->position);
@@ -65,21 +65,29 @@ void Grid::pruneUnusedNodes() {
             for (int dest_j = particle->j_lo; dest_j < particle->j_hi; ++dest_j) {
                 for (int dest_k = particle->k_lo; dest_k < particle->k_hi; ++dest_k) {
                     GridNode *node = nodes[dest_i][dest_j][dest_k];
-                    if (node == NULL) {
-                        GridNode *node = new GridNode();
-                        node->index = ivec3(dest_i, dest_j, dest_k);
-                        nodes[dest_i][dest_j][dest_k] = node;
+                    if (node != NULL) { // if NULL, we deal with it in resetGrid
+                        nodes_to_keep.insert(node); // pointers naturally are comparable for a set
                     }
-//                    if (node != NULL) { // if NULL, we'll add a new GridNode in resetGrid, so don't worry about it right now
-                    nodes_in_use.push_back(node);
-//                    }
                 }
             }
         }
     }
+
+    int old_size = nodes_in_use.size();
+    int new_size = nodes_to_keep.size();
+    nodes_in_use.clear();
+    for (GridNode *node : nodes_to_keep) {
+        nodes_in_use.push_back(node);
+    }
+    nodes_to_keep.clear();
+
+    cout << "nodes before pruning: " << old_size << endl;
+    cout << "nodes after pruning: " << new_size << endl;
 }
 
 void Grid::simulate(float delta_t, vector<vec3> external_accelerations, vector<CollisionObject *> *collision_objects, PhysicsParams* params) {
+
+    // Pruning does not yet work. Leaving it commented for now
 
 //    ++steps_since_node_reset;
 //    if (steps_since_node_reset > reset_time / delta_t) {

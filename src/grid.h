@@ -6,6 +6,7 @@
 #include "particle.h"
 #include "collision/collisionObject.h"
 #include "misc/physics_params.h"
+#include <set>
 
 using namespace std;
 using namespace glm;
@@ -43,8 +44,9 @@ public:
     vector<vector<vector<GridNode *> > > nodes; // eventually should probably make this private
 	vector<Particle *> all_particles;
 	vector<GridNode *> nodes_in_use;
-	bool first_step;
-	int steps_since_node_reset;
+	set<GridNode *> nodes_to_keep;
+	bool first_step = true;
+	int steps_since_node_reset = 0;
 
     void pruneUnusedNodes();
 	void resetGrid();
