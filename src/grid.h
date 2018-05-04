@@ -33,9 +33,8 @@ public:
   ThreadPool* thread_pool;
 	Grid(int dim_x, int dim_y, int dim_z, float grid_h): h(grid_h) {
 
-    thread_pool = new ThreadPool(4);
     num_threads = std::thread::hardware_concurrency();
-    ThreadPool pool(num_threads);
+		thread_pool = new ThreadPool(num_threads);
     this->dim_x = dim_x;
     this->dim_y = dim_y;
     this->dim_z = dim_z;
@@ -52,6 +51,7 @@ public:
 	vector<Particle *> all_particles;
 	int num_threads;
 	void particle_parallel_for(void (*f)(Particle*));
+	void gridnode_parallel_for(void (*f)(GridNode*));
 	static void reset_grid_worker(Particle * particle);
 	set<GridNode *> nodes_in_use;
 	bool first_step = true;
