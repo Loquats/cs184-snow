@@ -217,6 +217,20 @@ int main(int argc, char **argv)
     }
   }
 
+  cout << endl << endl;
+  cout << "Running with parameters: \n";
+  cout << "=======================\n";
+  cout << "headless: " << headless << endl;
+  cout << "length: " << length << endl;
+  cout << "frames_per_second: " << frames_per_second << endl;
+  cout << "delta_t: " << delta_t << endl;
+  cout << "E_0: " << E_0 << endl;
+  cout << "nu: " << nu << endl;
+  cout << "theta_c: " << theta_c << endl;
+  cout << "theta_s: " << theta_s << endl;
+  cout << "alpha: " << alpha << endl;
+  cout << endl << endl;
+
   loadOpenGl();
 
   setGlfwCallbacks();
