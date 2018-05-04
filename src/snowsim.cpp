@@ -9,13 +9,19 @@
 #include "grid.h"
 #include "collision/plane.h"
 #include "collision/sphere.h"
+#include "collision/rectangle.h"
 
 using namespace std;
 
-SnowSimulator::SnowSimulator(int frames_per_sec, int length) {
-
+SnowSimulator::SnowSimulator(int frames_per_sec, int length, float delta_t, PhysicsParams* params) {
   this->frames_per_sec = frames_per_sec;
   this->length = length;
+  this->delta_t = delta_t;
+  this->params = params;
+
+  this->external_accelerations = {gravity};
+  float frame_duration = float(1. / frames_per_sec);
+  this->simulation_steps = int(std::round(frame_duration / delta_t));
 //  glEnable(GL_PROGRAM_POINT_SIZE);
 //  glEnable(GL_DEPTH_TEST);
 }
@@ -34,9 +40,9 @@ void SnowSimulator::loadGrid(struct Grid *grid) {
   this->grid = grid;
 }
 
-//void SnowSimulator::loadClothParameters(ClothParameters *cp) { this->cp = cp; }
-
-void SnowSimulator::loadCollisionObjects(vector<CollisionObject *> *objects) { this->collision_objects = objects; }
+void SnowSimulator::loadCollisionObjects(vector<CollisionObject *> *objects) {
+  this->collision_objects = objects;
+}
 
 /**
  * Initializes the cloth simulation and spawns a new thread to separate
@@ -111,14 +117,44 @@ void SnowSimulator::init(Camera *camera, Shader *shader, glm::mat4 model) {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
 
-  float vs = 0.2;
+  float vs = 0.5;
   GLfloat cube_vertices[] = {
-          -vs, -vs, -vs,   -vs, -vs,  vs,   -vs,  vs,  vs,   -vs,  vs, -vs,
-          vs, -vs, -vs,    vs, -vs,  vs,    vs,  vs,  vs,    vs,  vs, -vs,
-          -vs, -vs, -vs,   -vs, -vs,  vs,    vs, -vs,  vs,    vs, -vs, -vs,
-          -vs,  vs, -vs,   -vs,  vs,  vs,    vs,  vs,  vs,    vs,  vs, -vs,
-          -vs, -vs, -vs,   -vs,  vs, -vs,    vs,  vs, -vs,    vs, -vs, -vs,
-          -vs, -vs,  vs,   -vs,  vs,  vs,    vs,  vs,  vs,    vs, -vs,  vs
+    -vs,-vs,-vs, // triangle 1 : begin
+    -vs,-vs, vs,
+    -vs, vs, vs, // triangle 1 : end
+    vs, vs,-vs, // triangle 2 : begin
+    -vs,-vs,-vs,
+    -vs, vs,-vs, // triangle 2 : end
+    vs,-vs, vs,
+    -vs,-vs,-vs,
+    vs,-vs,-vs,
+    vs, vs,-vs,
+    vs,-vs,-vs,
+    -vs,-vs,-vs,
+    -vs,-vs,-vs,
+    -vs, vs, vs,
+    -vs, vs,-vs,
+    vs,-vs, vs,
+    -vs,-vs, vs,
+    -vs,-vs,-vs,
+    -vs, vs, vs,
+    -vs,-vs, vs,
+    vs,-vs, vs,
+    vs, vs, vs,
+    vs,-vs,-vs,
+    vs, vs,-vs,
+    vs,-vs,-vs,
+    vs, vs, vs,
+    vs,-vs, vs,
+    vs, vs, vs,
+    vs, vs,-vs,
+    -vs, vs,-vs,
+    vs, vs, vs,
+    -vs, vs,-vs,
+    -vs, vs, vs,
+    vs, vs, vs,
+    -vs, vs, vs,
+    vs,-vs, vs
   };
 
   glGenVertexArrays(1, &particle_VAO);
@@ -161,21 +197,23 @@ void SnowSimulator::init(Camera *camera, Shader *shader, glm::mat4 model) {
 
 
 void SnowSimulator::drawContents() {
-  // TODO
   glEnable(GL_DEPTH_TEST);
 
   if (!is_paused) {
-    vector<vec3> external_accelerations = {gravity};
-    float frame_time = float(1. / frames_per_sec);
-    int simulation_steps = int(std::round(frame_time / delta_t));
     clock_t start = clock();
-    float E0 = 1.4e5;
     for (int i = 0; i < simulation_steps; i++) {
-      grid->simulate(delta_t, external_accelerations, collision_objects, E0);
+      // Not sure about the order of these updates:
+      for (CollisionObject* co : *collision_objects) {
+        if (!co->is_stationary()) {
+          // TODO: make an abstract class called MovableCollisionObject for casting
+          Rectangle* rect = (Rectangle*) co;
+          rect->update_position(delta_t);
+        }
+      }
+      grid->simulate(delta_t, external_accelerations, collision_objects, params);
     }
     double duration = (clock() - start) / (double) CLOCKS_PER_SEC;
     cout << "Frame time: " << duration << " seconds\n";
-
   }
 
 
@@ -209,14 +247,16 @@ void SnowSimulator::drawParticles(glm::vec4 color) {
   vector<Particle *>& all_particles = grid->all_particles;
 
   for(Particle* particle : all_particles) {
-    glm::mat4 particle_model = glm::translate(modeltoworld, particle->position);
+    float len = particle->cbrt_volume;
+    glm::mat4 particle_model;
+    particle_model = glm::scale(particle_model, glm::vec3(len, len, len));
+    particle_model = modeltoworld * particle_model;
+    particle_model = glm::translate(glm::mat4(), particle->position) * particle_model;
     shader->setVec4("in_color", color);
     shader->setMat4("model", particle_model);
     glBindVertexArray(particle_VAO);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 24);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
   }
-
-
 }
 
 void SnowSimulator::drawGridForces() {
@@ -290,183 +330,3 @@ void SnowSimulator::drawParticleForces() {
   glDrawArrays(GL_LINES, 0, num_vertices);
 
 }
-
-// ----------------------------------------------------------------------------
-// CAMERA CALCULATIONS
-//
-// OpenGL 3.1 deprecated the fixed pipeline, so we lose a lot of useful OpenGL
-// functions that have to be recreated here.
-// ----------------------------------------------------------------------------
-// TODO CAMERA SHIT
-//void SnowSimulator::resetCamera() { camera.copy_placement(canonicalCamera); }
-//
-//Matrix4f SnowSimulator::getProjectionMatrix() {
-//  Matrix4f perspective;
-//  perspective.setZero();
-//
-//  double near = camera.near_clip();
-//  double far = camera.far_clip();
-//
-//  double theta = camera.v_fov() * M_PI / 360;
-//  double range = far - near;
-//  double invtan = 1. / tanf(theta);
-//
-//  perspective(0, 0) = invtan / camera.aspect_ratio();
-//  perspective(1, 1) = invtan;
-//  perspective(2, 2) = -(near + far) / range;
-//  perspective(3, 2) = -1;
-//  perspective(2, 3) = -2 * near * far / range;
-//  perspective(3, 3) = 0;
-//
-//  return perspective;
-//}
-//
-//Matrix4f SnowSimulator::getViewMatrix() {
-//  Matrix4f lookAt;
-//  Matrix3f R;
-//
-//  lookAt.setZero();
-//
-//  // Convert CGL vectors to Eigen vectors
-//  // TODO: Find a better way to do this!
-//
-//  CGL::Vector3D c_pos = camera.position();
-//  CGL::Vector3D c_udir = camera.up_dir();
-//  CGL::Vector3D c_target = camera.view_point();
-//
-//  Vector3f eye(c_pos.x, c_pos.y, c_pos.z);
-//  Vector3f up(c_udir.x, c_udir.y, c_udir.z);
-//  Vector3f target(c_target.x, c_target.y, c_target.z);
-//
-//  R.col(2) = (eye - target).normalized();
-//  R.col(0) = up.cross(R.col(2)).normalized();
-//  R.col(1) = R.col(2).cross(R.col(0));
-//
-//  lookAt.topLeftCorner<3, 3>() = R.transpose();
-//  lookAt.topRightCorner<3, 1>() = -R.transpose() * eye;
-//  lookAt(3, 3) = 1.0f;
-//
-//  return lookAt;
-//}
-//
-//// ----------------------------------------------------------------------------
-//// EVENT HANDLING
-//// ----------------------------------------------------------------------------
-//
-//bool SnowSimulator::cursorPosCallbackEvent(double x, double y) {
-//  if (left_down && !middle_down && !right_down) {
-//    if (ctrl_down) {
-//      mouseRightDragged(x, y);
-//    } else {
-//      mouseLeftDragged(x, y);
-//    }
-//  } else if (!left_down && !middle_down && right_down) {
-//    mouseRightDragged(x, y);
-//  } else if (!left_down && !middle_down && !right_down) {
-//    mouseMoved(x, y);
-//  }
-//
-//  mouse_x = x;
-//  mouse_y = y;
-//
-//  return true;
-//}
-//
-//bool SnowSimulator::mouseButtonCallbackEvent(int button, int action,
-//                                              int modifiers) {
-//  switch (action) {
-//    case GLFW_PRESS:
-//      switch (button) {
-//        case GLFW_MOUSE_BUTTON_LEFT:
-//          left_down = true;
-//          break;
-//        case GLFW_MOUSE_BUTTON_MIDDLE:
-//          middle_down = true;
-//          break;
-//        case GLFW_MOUSE_BUTTON_RIGHT:
-//          right_down = true;
-//          break;
-//      }
-//      return true;
-//
-//    case GLFW_RELEASE:
-//      switch (button) {
-//        case GLFW_MOUSE_BUTTON_LEFT:
-//          left_down = false;
-//          break;
-//        case GLFW_MOUSE_BUTTON_MIDDLE:
-//          middle_down = false;
-//          break;
-//        case GLFW_MOUSE_BUTTON_RIGHT:
-//          right_down = false;
-//          break;
-//      }
-//      return true;
-//  }
-//
-//  return false;
-//}
-//
-//void SnowSimulator::mouseMoved(double x, double y) { y = screen_h - y; }
-//
-//void SnowSimulator::mouseLeftDragged(double x, double y) {
-//  float dx = x - mouse_x;
-//  float dy = y - mouse_y;
-//
-//  camera.rotate_by(-dy * (PI / screen_h), -dx * (PI / screen_w));
-//}
-//
-//void SnowSimulator::mouseRightDragged(double x, double y) {
-//  camera.move_by(mouse_x - x, y - mouse_y, canonical_view_distance);
-//}
-//
-//bool SnowSimulator::keyCallbackEvent(int key, int scancode, int action,
-//                                      int mods) {
-//  ctrl_down = (bool)(mods & GLFW_MOD_CONTROL);
-//
-//  if (action == GLFW_PRESS) {
-//    switch (key) {
-//      case GLFW_KEY_ESCAPE:
-//        is_alive = false;
-//        break;
-//      case 'r':
-//      case 'R':
-//        cloth->reset();
-//        break;
-//      case ' ':
-//        resetCamera();
-//        break;
-//      case 'p':
-//      case 'P':
-//        is_paused = !is_paused;
-//        break;
-//      case 'n':
-//      case 'N':
-//        if (is_paused) {
-//          is_paused = false;
-//          drawContents();
-//          is_paused = true;
-//        }
-//        break;
-//    }
-//  }
-//
-//  return true;
-//}
-//
-//bool SnowSimulator::dropCallbackEvent(int count, const char **filenames) {
-//  return true;
-//}
-//
-//bool SnowSimulator::scrollCallbackEvent(double x, double y) {
-//  camera.move_forward(y * scroll_rate);
-//  return true;
-//}
-//
-//bool SnowSimulator::resizeCallbackEvent(int width, int height) {
-//  screen_w = width;
-//  screen_h = height;
-//
-//  camera.set_screen_size(screen_w, screen_h);
-//  return true;
-//}

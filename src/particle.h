@@ -12,10 +12,11 @@ public:
 
   glm::vec3 position;
   glm::vec3 velocity;
+  glm::vec3 dim;
   float mass;
   float volume;
-  glm::vec3 dim;
   float h;
+  float cbrt_volume;    // For rendering
 
   glm::mat3 deformation_grad_E;
   glm::mat3 deformation_grad_P;

@@ -1,4 +1,3 @@
-
 #ifndef SNOW_SNOWSIM_H
 #define SNOW_SNOWSIM_H
 
@@ -10,6 +9,7 @@
 #include "collision/collisionObject.h"
 #include "camera.h"
 #include "shader.h"
+#include "misc/physics_params.h"
 
 #include <Eigen/Dense>
 using Eigen::MatrixXd;
@@ -18,7 +18,7 @@ using namespace glm;
 
 class SnowSimulator {
 public:
-  SnowSimulator(int frames_per_sec, int length);
+  SnowSimulator(int frames_per_sec, int length, float delta_t, PhysicsParams* params);
   ~SnowSimulator();
 
   void init(Camera *camera, Shader *shader, glm::mat4 model);
@@ -53,11 +53,14 @@ private:
 
   int frames_per_sec = 30;
   int length;
-  float delta_t = 1e-3;
+  float delta_t;
+  float simulation_steps;       // simulation steps per frame
+  PhysicsParams* params;
 
   glm::mat4 modeltoworld;
 
   glm::vec3 gravity = glm::vec3(0.0f, -9.8f, 0.0f);
+  vector<vec3> external_accelerations;
 
   Grid *grid;
 //  ClothParameters *cp;

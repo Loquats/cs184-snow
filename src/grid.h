@@ -7,9 +7,13 @@
 #include "particle.h"
 #include "collision/collisionObject.h"
 #include "misc/threadpool.h"
+#include "misc/physics_params.h"
+#include <set>
 
 using namespace std;
 using namespace glm;
+
+const float reset_time = 0.1; // seconds of simulation to reset grid nodes
 
 struct GridNode {
 	vec3 index;	// the {i, j, k} index of the grid node
@@ -41,24 +45,22 @@ public:
 			nodes[i] = vector<vector<GridNode *> >(dim_y);
 			for (int j = 0; j < dim_y; ++j) {
 				nodes[i][j] = vector<GridNode *>(dim_z);
-				for (int k = 0; k < dim_z; ++k) {
-					nodes[i][j][k] = new GridNode();
-					nodes[i][j][k]->index = vec3(i, j, k);
-				}
 			}
 		}
 	};
     vector<vector<vector<GridNode *> > > nodes; // eventually should probably make this private
 	vector<Particle *> all_particles;
 	int num_threads;
-//	ThreadPool thread_pool(4);
-	bool first_step;
 	void particle_parallel_for(void (*f)(Particle*));
 	static void reset_grid_worker(Particle * particle);
+	set<GridNode *> nodes_in_use;
+	bool first_step = true;
+	int steps_since_node_reset = 0;
 
+    void pruneUnusedNodes();
 	void resetGrid();
 	void loadParticles(vector<Particle *> particles) { this->all_particles = particles; };
-	void simulate(float delta_t, vector<vec3> external_accelerations, vector<CollisionObject *> *collision_objects, float E0);
+	void simulate(float delta_t, vector<vec3> external_accelerations, vector<CollisionObject *> *collision_objects, PhysicsParams* params);
 
 	/*
 	* Step 1: compute the mass and velocity of each grid node based the particles

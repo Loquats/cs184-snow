@@ -35,36 +35,85 @@ void Grid::particle_parallel_for(void (*f)(Particle*)) {
 
 
 void Grid::resetGrid() {
-  for (int i = 0; i < dim_x; ++i) {
-      for (int j = 0; j < dim_y; ++j) {
-          for (int k = 0; k < dim_z; ++k) {
-              nodes[i][j][k]->mass = 0;
-              nodes[i][j][k]->velocity = vec3(0.0);
-              nodes[i][j][k]->next_velocity = vec3(0.0);
-              nodes[i][j][k]->force = vec3(0.0);
-              nodes[i][j][k]->particles.clear();
-          }
-      }
-  }
-  for (Particle *particle : all_particles) {
-    // I'm not 100% sure rounding is the right thing to do, but the b-spline is centered on the grid index itself so I think it's right
-    // Gonna use floor for now to be consistent with the rest of the code
-    // TODO: figure this out
-    ivec3 index = glm::floor(particle->position); 
-    nodes[index.x][index.y][index.z]->particles.push_back(particle);
-//    particle->compute_neighborhood_bounds(dim_x, dim_y, dim_z, h);
-  }
-  particle_parallel_for(reset_grid_worker);
+
+    for (GridNode *node : nodes_in_use) {
+        node->mass = 0;
+        node->velocity = vec3(0.0);
+        node->next_velocity = vec3(0.0);
+        node->force = vec3(0.0);
+        node->particles.clear();
+    }
+    particle_parallel_for(reset_grid_worker);
+    for (Particle *particle : all_particles) {
+        // I'm not 100% sure rounding is the right thing to do, but the b-spline is centered on the grid index itself so I think it's right
+        // Gonna use floor for now to be consistent with the rest of the code
+        ivec3 index = glm::floor(particle->position);
+
+        // We need to compute the new neighborhood bounds before we try instantiating needed GridNodes in the interpolation radius.
+//        particle->compute_neighborhood_bounds(dim_x, dim_y, dim_z, h);
+//        particle->compute_b_spline_grad(h);
+        for (int dest_i = particle->i_lo; dest_i < particle->i_hi; ++dest_i) {
+            for (int dest_j = particle->j_lo; dest_j < particle->j_hi; ++dest_j) {
+                for (int dest_k = particle->k_lo; dest_k < particle->k_hi; ++dest_k) {
+                    GridNode *node = nodes[dest_i][dest_j][dest_k];
+                    if (node == NULL) {
+                        node = new GridNode();
+                        node->index = ivec3(dest_i, dest_j, dest_k);
+                        nodes[dest_i][dest_j][dest_k] = node;
+                    }
+                    nodes_in_use.insert(node);
+                }
+            }
+        }
+        // We need to instantiate the nodes that are to be in use, before we try pushing the particle
+        nodes[index.x][index.y][index.z]->particles.push_back(particle);
+    }
+
 }
 
-void Grid::simulate(float delta_t, vector<vec3> external_accelerations, vector<CollisionObject *> *collision_objects, float E0) {
-    float v0 = 0.2;
-    float mu_0 = E0 / (2. * (1.+v0));
-    float lambda_0 = E0 * v0 / ((1.+v0) * (1.-2.*v0));
-    float xi = 10;
-    float theta_c = 2.5e-2;
-    float theta_s = 7.5e-3;
-    float alpha = 0.95;
+// Particles move over time and nodes fall in and out of use. We prune to avoid building up a bunch of unused grid nodes.
+void Grid::pruneUnusedNodes() {
+
+    cout << "(pruning nodes)";
+
+    for (GridNode *node : nodes_in_use) {
+        ivec3 index = node->index;
+        nodes[index.x][index.y][index.z] = NULL;
+        delete node;
+    }
+
+    nodes_in_use.clear();
+//
+//    for (Particle *particle : all_particles) {
+//        ivec3 index = glm::floor(particle->position);
+//        particle->compute_neighborhood_bounds(dim_x, dim_y, dim_z, h);
+//        for (int dest_i = particle->i_lo; dest_i < particle->i_hi; ++dest_i) { // iterate over everything in interpolation radius
+//            for (int dest_j = particle->j_lo; dest_j < particle->j_hi; ++dest_j) {
+//                for (int dest_k = particle->k_lo; dest_k < particle->k_hi; ++dest_k) {
+//                    GridNode *node = nodes[dest_i][dest_j][dest_k];
+//                    if (node != NULL) { // if NULL, we deal with it in resetGrid
+//                        nodes_in_use.insert(node); // pointers naturally are comparable for a set
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    int new_size = nodes_in_use.size();
+//
+//    cout << "nodes before pruning: " << old_size << endl;
+//    cout << "nodes after pruning: " << new_size << endl;
+}
+
+void Grid::simulate(float delta_t, vector<vec3> external_accelerations, vector<CollisionObject *> *collision_objects, PhysicsParams* params) {
+
+    // Every so often, prune unused nodes so that we don't run all the computations on them.
+    // We set steps_since_node_reset so that the if condition fires when {reset_time} seconds have elapsed.
+    ++steps_since_node_reset;
+    if (steps_since_node_reset > reset_time / delta_t) {
+        pruneUnusedNodes();
+        steps_since_node_reset = 0;
+    }
 
     resetGrid();
     particle_to_grid();                       // Step 1.
@@ -73,13 +122,13 @@ void Grid::simulate(float delta_t, vector<vec3> external_accelerations, vector<C
         first_step = false;
     }
     compute_F_hat_Ep(delta_t);                // (Step 3.)
-    compute_grid_forces(mu_0, lambda_0, xi);  // Step 3.
+    compute_grid_forces(params->mu_0, params->lambda_0, params->xi);  // Step 3.
     // apply_ext_accelerations(external_accelerations);     // not a step
     compute_grid_velocities(delta_t, collision_objects);    // Step 4.
                                                             // Step 5: grid-base collisions (skipped)
     // compute_time_integration();                          // Step 6: disabled b/c do not use semi-implicit integratino
-    update_deformation_gradients(theta_c, theta_s, delta_t);// Step 7.
-    update_particle_velocities(alpha);                      // Step 8.
+    update_deformation_gradients(params->theta_c, params->theta_s, delta_t);// Step 7.
+    update_particle_velocities(params->alpha);                      // Step 8.
 
     // the code below could get wrapped up in a method, i just didn't bother since it's sorta in test still
     // also kinda unsure of whether we're supposed to apply accelerations on the grid or the particles
@@ -119,14 +168,10 @@ void Grid::particle_to_grid() {
   }
 
   // Normalize grid velocity by its mass all at once
-  for (int i = 0; i < dim_x; ++i) {
-    for (int j = 0; j < dim_y; ++j) {
-      for (int k = 0; k < dim_z; ++k) {
-        if (nodes[i][j][k]->mass > 0) {
-          nodes[i][j][k]->velocity /= nodes[i][j][k]->mass;
-        }
+  for (GridNode *node : nodes_in_use) {
+      if (node->mass > 0) {
+          node->velocity /= node->mass;
       }
-    }
   }
 }
 
@@ -147,6 +192,7 @@ void Grid::compute_particle_volumes() {
     }
     density /= h3;
     particle->volume = particle->mass / density;
+    particle->cbrt_volume = cbrt(particle->volume);
   }
 }
 
@@ -216,22 +262,17 @@ void Grid::apply_ext_accelerations(vector<vec3> external_accelerations) {
  * Step 4 and 5: update grid node velocities, do collisions
  */
 void Grid::compute_grid_velocities(float delta_t, vector<CollisionObject *> *collision_objects) {
-  for (int i = 0; i < dim_x; ++i) {
-    for (int j = 0; j < dim_y; ++j) {
-      for (int k = 0; k < dim_z; ++k) {
-        GridNode* node = nodes[i][j][k];
+    for (GridNode *node : nodes_in_use) {
         node->next_velocity = node->velocity;
         if (node->mass > 0) {
-          node->next_velocity += node->force * delta_t / node->mass;
+            node->next_velocity += node->force * delta_t / node->mass;
         }
         vec3 position = node->index * h;
         vec3 next_position = position + node->velocity * delta_t;
         for (CollisionObject* co : *collision_objects) {
-          // node->next_velocity = co->collide(position, next_position, node->next_velocity);
+            // node->next_velocity = co->collide(position, next_position, node->next_velocity);
         }
-      }
     }
-  }
 }
 
 /*

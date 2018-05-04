@@ -40,3 +40,7 @@ void Plane::render(Shader *shader) {
   glBindVertexArray(plane_VAO);
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
+
+bool Plane::is_stationary() {
+  return true;
+}

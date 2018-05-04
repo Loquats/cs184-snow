@@ -14,6 +14,7 @@ public:
 
   void render();
   vec3 collide(vec3 position, vec3 next_position, vec3 velocity);
+  bool is_stationary();
 
 private:
   vec3 origin;
