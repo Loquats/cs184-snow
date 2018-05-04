@@ -336,8 +336,8 @@ void Grid::update_particle_velocities(float alpha) {
 void Grid::compute_particle_collisions(float delta_t, vector<CollisionObject *> *objects) {
   for (Particle *particle : all_particles) {
     for (CollisionObject *co : *objects) {
-      vec3 next_position = particle->position + delta_t * particle->velocity;
-      particle->velocity = co->collide(particle->position, next_position, particle->velocity);
+//      vec3 next_position = particle->position + delta_t * particle->velocity;
+      particle->velocity = co->collide(particle->position, particle->velocity, delta_t);
     }
   }
 }

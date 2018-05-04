@@ -58,7 +58,7 @@ public:
   }
 
   void render(Shader *shader);
-  vec3 collide(vec3 position, vec3 next_position, vec3 velocity);
+  vec3 collide(vec3 position, vec3 velocity, float delta_t);
   bool is_stationary();
 
   const int static num_vertices = 4;

@@ -4,7 +4,8 @@
 #define SURFACE_OFFSET 0.0001
 using namespace glm;
 
-vec3 Plane::collide(vec3 position, vec3 next_position, vec3 velocity) {
+vec3 Plane::collide(vec3 position, vec3 velocity, float delta_t) {
+    vec3 next_position = position + velocity * delta_t;
     float test = dot(position - point, normal);
     float test_next = dot(next_position - point, normal);
     if (abs(test_next) < SURFACE_OFFSET || test * test_next < 0) { // the particle crosses over

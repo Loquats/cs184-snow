@@ -5,7 +5,7 @@
 
 using namespace glm;
 
-vec3 Sphere::collide(vec3 position, vec3 next_position, vec3 velocity) {
+vec3 Sphere::collide(vec3 position, vec3 velocity, float delta_t) {
   //todo
     return vec3(0.0);
 }
