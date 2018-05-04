@@ -30,12 +30,13 @@ void Grid::resetGrid() {
         for (int dest_i = particle->i_lo; dest_i < particle->i_hi; ++dest_i) {
             for (int dest_j = particle->j_lo; dest_j < particle->j_hi; ++dest_j) {
                 for (int dest_k = particle->k_lo; dest_k < particle->k_hi; ++dest_k) {
-                    if (nodes[dest_i][dest_j][dest_k] == NULL) {
-                        GridNode *node = new GridNode();
+                    GridNode *node = nodes[dest_i][dest_j][dest_k];
+                    if (node == NULL) {
+                        node = new GridNode();
                         node->index = ivec3(dest_i, dest_j, dest_k);
                         nodes[dest_i][dest_j][dest_k] = node;
-                        nodes_in_use.push_back(node);
                     }
+                    nodes_in_use.insert(node);
                 }
             }
         }
@@ -45,55 +46,49 @@ void Grid::resetGrid() {
 
 }
 
-// Particles move over time and nodes fall in and out of
+// Particles move over time and nodes fall in and out of use. We prune to avoid building up a bunch of unused grid nodes.
 void Grid::pruneUnusedNodes() {
 
+    cout << "(pruning nodes)";
+
     for (GridNode *node : nodes_in_use) {
-        node->mass = 0;
-        node->velocity = vec3(0.0);
-        node->next_velocity = vec3(0.0);
-        node->force = vec3(0.0);
-        node->particles.clear();
+        ivec3 index = node->index;
+        nodes[index.x][index.y][index.z] = NULL;
+        delete node;
     }
 
-    cout << "pruning nodes" << endl;
-
-    for (Particle *particle : all_particles) {
-        ivec3 index = glm::floor(particle->position);
-        particle->compute_neighborhood_bounds(dim_x, dim_y, dim_z, h);
-        for (int dest_i = particle->i_lo; dest_i < particle->i_hi; ++dest_i) { // iterate over everything in interpolation radius
-            for (int dest_j = particle->j_lo; dest_j < particle->j_hi; ++dest_j) {
-                for (int dest_k = particle->k_lo; dest_k < particle->k_hi; ++dest_k) {
-                    GridNode *node = nodes[dest_i][dest_j][dest_k];
-                    if (node != NULL) { // if NULL, we deal with it in resetGrid
-                        nodes_to_keep.insert(node); // pointers naturally are comparable for a set
-                    }
-                }
-            }
-        }
-    }
-
-    int old_size = nodes_in_use.size();
-    int new_size = nodes_to_keep.size();
     nodes_in_use.clear();
-    for (GridNode *node : nodes_to_keep) {
-        nodes_in_use.push_back(node);
-    }
-    nodes_to_keep.clear();
-
-    cout << "nodes before pruning: " << old_size << endl;
-    cout << "nodes after pruning: " << new_size << endl;
+//
+//    for (Particle *particle : all_particles) {
+//        ivec3 index = glm::floor(particle->position);
+//        particle->compute_neighborhood_bounds(dim_x, dim_y, dim_z, h);
+//        for (int dest_i = particle->i_lo; dest_i < particle->i_hi; ++dest_i) { // iterate over everything in interpolation radius
+//            for (int dest_j = particle->j_lo; dest_j < particle->j_hi; ++dest_j) {
+//                for (int dest_k = particle->k_lo; dest_k < particle->k_hi; ++dest_k) {
+//                    GridNode *node = nodes[dest_i][dest_j][dest_k];
+//                    if (node != NULL) { // if NULL, we deal with it in resetGrid
+//                        nodes_in_use.insert(node); // pointers naturally are comparable for a set
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    int new_size = nodes_in_use.size();
+//
+//    cout << "nodes before pruning: " << old_size << endl;
+//    cout << "nodes after pruning: " << new_size << endl;
 }
 
 void Grid::simulate(float delta_t, vector<vec3> external_accelerations, vector<CollisionObject *> *collision_objects, PhysicsParams* params) {
 
-    // Pruning does not yet work. Leaving it commented for now
-
-//    ++steps_since_node_reset;
-//    if (steps_since_node_reset > reset_time / delta_t) {
-//        pruneUnusedNodes();
-//        steps_since_node_reset = 0;
-//    }
+    // Every so often, prune unused nodes so that we don't run all the computations on them.
+    // We set steps_since_node_reset so that the if condition fires when {reset_time} seconds have elapsed.
+    ++steps_since_node_reset;
+    if (steps_since_node_reset > reset_time / delta_t) {
+        pruneUnusedNodes();
+        steps_since_node_reset = 0;
+    }
 
     resetGrid();
     particle_to_grid();                       // Step 1.

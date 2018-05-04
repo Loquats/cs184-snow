@@ -11,7 +11,7 @@
 using namespace std;
 using namespace glm;
 
-const float reset_time = 0.25; // seconds of simulation to reset grid nodes
+const float reset_time = 0.1; // seconds of simulation to reset grid nodes
 
 struct GridNode {
 	vec3 index;	// the {i, j, k} index of the grid node
@@ -43,8 +43,8 @@ public:
 	};
     vector<vector<vector<GridNode *> > > nodes; // eventually should probably make this private
 	vector<Particle *> all_particles;
-	vector<GridNode *> nodes_in_use;
-	set<GridNode *> nodes_to_keep;
+	set<GridNode *> nodes_in_use;
+//	set<GridNode *> nodes_to_keep;
 	bool first_step = true;
 	int steps_since_node_reset = 0;
 
