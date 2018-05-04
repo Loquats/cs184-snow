@@ -12,15 +12,15 @@
 
 using namespace std;
 
-SnowSimulator::SnowSimulator(int frames_per_sec, int length, float delta_t) {
+SnowSimulator::SnowSimulator(int frames_per_sec, int length, float delta_t, PhysicsParams* params) {
   this->frames_per_sec = frames_per_sec;
   this->length = length;
   this->delta_t = delta_t;
+  this->params = params;
 
   this->external_accelerations = {gravity};
   float frame_duration = float(1. / frames_per_sec);
   this->simulation_steps = int(std::round(frame_duration / delta_t));
-  this->E0 = 1.4e5;
 //  glEnable(GL_PROGRAM_POINT_SIZE);
 //  glEnable(GL_DEPTH_TEST);
 }
@@ -38,8 +38,6 @@ SnowSimulator::SnowSimulator(int frames_per_sec, int length, float delta_t) {
 void SnowSimulator::loadGrid(struct Grid *grid) {
   this->grid = grid;
 }
-
-//void SnowSimulator::loadClothParameters(ClothParameters *cp) { this->cp = cp; }
 
 void SnowSimulator::loadCollisionObjects(vector<CollisionObject *> *objects) { this->collision_objects = objects; }
 
@@ -202,7 +200,7 @@ void SnowSimulator::drawContents() {
   if (!is_paused) {
     clock_t start = clock();
     for (int i = 0; i < simulation_steps; i++) {
-      grid->simulate(delta_t, external_accelerations, collision_objects, E0);
+      grid->simulate(delta_t, external_accelerations, collision_objects, params);
     }
     double duration = (clock() - start) / (double) CLOCKS_PER_SEC;
     cout << "Frame time: " << duration << " seconds\n";

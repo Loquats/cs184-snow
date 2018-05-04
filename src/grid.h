@@ -5,6 +5,7 @@
 #include <vector>
 #include "particle.h"
 #include "collision/collisionObject.h"
+#include "misc/physics_params.h"
 
 using namespace std;
 using namespace glm;
@@ -47,7 +48,7 @@ public:
 
 	void resetGrid();
 	void loadParticles(vector<Particle *> particles) { this->all_particles = particles; };
-	void simulate(float delta_t, vector<vec3> external_accelerations, vector<CollisionObject *> *collision_objects, float E0);
+	void simulate(float delta_t, vector<vec3> external_accelerations, vector<CollisionObject *> *collision_objects, PhysicsParams* params);
 
 	/*
 	* Step 1: compute the mass and velocity of each grid node based the particles

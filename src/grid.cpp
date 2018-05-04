@@ -33,15 +33,7 @@ void Grid::resetGrid() {
   }
 }
 
-void Grid::simulate(float delta_t, vector<vec3> external_accelerations, vector<CollisionObject *> *collision_objects, float E0) {
-    float v0 = 0.2;
-    float mu_0 = E0 / (2. * (1.+v0));
-    float lambda_0 = E0 * v0 / ((1.+v0) * (1.-2.*v0));
-    float xi = 10;
-    float theta_c = 2.5e-2;
-    float theta_s = 7.5e-3;
-    float alpha = 0.95;
-
+void Grid::simulate(float delta_t, vector<vec3> external_accelerations, vector<CollisionObject *> *collision_objects, PhysicsParams* params) {
     resetGrid();
     particle_to_grid();                       // Step 1.
     if (first_step) {
@@ -49,13 +41,13 @@ void Grid::simulate(float delta_t, vector<vec3> external_accelerations, vector<C
         first_step = false;
     }
     compute_F_hat_Ep(delta_t);                // (Step 3.)
-    compute_grid_forces(mu_0, lambda_0, xi);  // Step 3.
+    compute_grid_forces(params->mu_0, params->lambda_0, params->xi);  // Step 3.
     // apply_ext_accelerations(external_accelerations);     // not a step
     compute_grid_velocities(delta_t, collision_objects);    // Step 4.
                                                             // Step 5: grid-base collisions (skipped)
     // compute_time_integration();                          // Step 6: disabled b/c do not use semi-implicit integratino
-    update_deformation_gradients(theta_c, theta_s, delta_t);// Step 7.
-    update_particle_velocities(alpha);                      // Step 8.
+    update_deformation_gradients(params->theta_c, params->theta_s, delta_t);// Step 7.
+    update_particle_velocities(params->alpha);                      // Step 8.
 
     // the code below could get wrapped up in a method, i just didn't bother since it's sorta in test still
     // also kinda unsure of whether we're supposed to apply accelerations on the grid or the particles

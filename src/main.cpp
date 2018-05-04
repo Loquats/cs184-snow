@@ -162,12 +162,20 @@ int main(int argc, char **argv)
   int frames_per_second = 30;
   float delta_t = 1e-3;
 
+  // Physics paramters
+  float E_0 = 1.4e5;            // Young's modulus
+  float nu = 0.2;               // Poisson's ratio
+  float xi = 10;                // Hardening coefficient
+  float theta_c = 2.5e-2;       // Critical compression
+  float theta_s = 7.5e-3;       // Critical stretch
+  float alpha = 0.95;           // FLIP/PIC ratio
+
   if (argc == 1) { // No arguments, default initialization
 //    loadObjectsFromFile(default_file_name, &cloth, &cp, &objects);
   } else {
     int c;
 
-    while ((c = getopt (argc, argv, "o:l:n:ht:")) != -1) {
+    while ((c = getopt (argc, argv, "o:l:n:ht:E:u:x:c:s:a:")) != -1) {
       switch (c) {
         case 'h':
           headless = true;
@@ -183,6 +191,24 @@ int main(int argc, char **argv)
           break;
         case 't':
           delta_t = atof(optarg);
+          break;
+        case 'E':
+          E_0 = atof(optarg);
+          break;
+        case 'u':
+          nu = atof(optarg);
+          break;
+        case 'x':
+          xi = atof(optarg);
+          break;
+        case 'c':
+          theta_c = atof(optarg);
+          break;
+        case 's':
+          theta_s = atof(optarg);
+          break;
+        case 'a':
+          alpha = atof(optarg);
           break;
         default:
           cout << optopt;
@@ -219,8 +245,8 @@ int main(int argc, char **argv)
   modeltoworld = glm::translate(modeltoworld, glm::vec3(-dim.x / 2, -dim.y / 2, -dim.z / 2));
 
   Grid* grid = new Grid(dim_x, dim_y, dim_z, h);
-
-  snowsim = new SnowSimulator(frames_per_second, length, delta_t);
+  PhysicsParams* params = new PhysicsParams(E_0, nu, xi, theta_c, theta_s, alpha);
+  snowsim = new SnowSimulator(frames_per_second, length, delta_t, params);
   snowsim->loadGrid(grid);
 
   //todo define object schemas and shit and find way to load
