@@ -18,7 +18,7 @@ using namespace glm;
 
 class SnowSimulator {
 public:
-  SnowSimulator(int frames_per_sec, int length);
+  SnowSimulator(int frames_per_sec, int length, float delta_t);
   ~SnowSimulator();
 
   void init(Camera *camera, Shader *shader, glm::mat4 model);
@@ -53,11 +53,14 @@ private:
 
   int frames_per_sec = 30;
   int length;
-  float delta_t = 1e-3;
+  float delta_t;
+  float simulation_steps;       // simulation steps per frame
+  float E0;
 
   glm::mat4 modeltoworld;
 
   glm::vec3 gravity = glm::vec3(0.0f, -9.8f, 0.0f);
+  vector<vec3> external_accelerations;
 
   Grid *grid;
 //  ClothParameters *cp;

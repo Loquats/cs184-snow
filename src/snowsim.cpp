@@ -12,10 +12,15 @@
 
 using namespace std;
 
-SnowSimulator::SnowSimulator(int frames_per_sec, int length) {
-
+SnowSimulator::SnowSimulator(int frames_per_sec, int length, float delta_t) {
   this->frames_per_sec = frames_per_sec;
   this->length = length;
+  this->delta_t = delta_t;
+
+  this->external_accelerations = {gravity};
+  float frame_duration = float(1. / frames_per_sec);
+  this->simulation_steps = int(std::round(frame_duration / delta_t));
+  this->E0 = 1.4e5;
 //  glEnable(GL_PROGRAM_POINT_SIZE);
 //  glEnable(GL_DEPTH_TEST);
 }
@@ -195,17 +200,12 @@ void SnowSimulator::drawContents() {
   glEnable(GL_DEPTH_TEST);
 
   if (!is_paused) {
-    vector<vec3> external_accelerations = {gravity};
-    float frame_time = float(1. / frames_per_sec);
-    int simulation_steps = int(std::round(frame_time / delta_t));
     clock_t start = clock();
-    float E0 = 1.4e5;
     for (int i = 0; i < simulation_steps; i++) {
       grid->simulate(delta_t, external_accelerations, collision_objects, E0);
     }
     double duration = (clock() - start) / (double) CLOCKS_PER_SEC;
     cout << "Frame time: " << duration << " seconds\n";
-
   }
 
 

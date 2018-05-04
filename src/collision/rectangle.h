@@ -9,7 +9,6 @@ using namespace glm;
 
 struct Rectangle : public CollisionObject {
 public:
-  // input is in model space (0, 0, 0) to (dimx, dimy, dimz)
   Rectangle(vec3 &in_origin, vec3 &edge_u, vec3 &edge_v, float mu, mat4 model, mat4 worldtomodel, vec4 color)
     : edge_u(edge_u), edge_v(edge_v), mu(mu), modeltoworld(model), worldtomodel(worldtomodel), color(color) {
       // Check if rectangle is valid: edges must be orthogonal

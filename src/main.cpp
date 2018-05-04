@@ -153,22 +153,21 @@ int main(int argc, char **argv)
   // THE PROGRAM AFTER A CERTAIN NUMBER OF FRAMES ARE CREATED
   bool headless = false;
   string outFilename = "out.avi";
+
+  // default 4 seconds at 30 fps
   // numframes in output
   int length = 12000;
 
   // fps wanted
   int frames_per_second = 30;
+  float delta_t = 1e-3;
 
   if (argc == 1) { // No arguments, default initialization
-    outFilename = "out.avi";
-    // default 4 seconds at 30 fps
-    length = 12000;
-    frames_per_second = 30;
 //    loadObjectsFromFile(default_file_name, &cloth, &cp, &objects);
   } else {
     int c;
 
-    while ((c = getopt (argc, argv, "o:l:n:h")) != -1) {
+    while ((c = getopt (argc, argv, "o:l:n:ht:")) != -1) {
       switch (c) {
         case 'h':
           headless = true;
@@ -181,6 +180,9 @@ int main(int argc, char **argv)
           break;
         case 'n':
           frames_per_second = atoi(optarg);
+          break;
+        case 't':
+          delta_t = atof(optarg);
           break;
         default:
           cout << optopt;
@@ -218,7 +220,7 @@ int main(int argc, char **argv)
 
   Grid* grid = new Grid(dim_x, dim_y, dim_z, h);
 
-  snowsim = new SnowSimulator(frames_per_second, length);
+  snowsim = new SnowSimulator(frames_per_second, length, delta_t);
   snowsim->loadGrid(grid);
 
   //todo define object schemas and shit and find way to load
