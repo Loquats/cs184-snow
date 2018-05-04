@@ -111,14 +111,44 @@ void SnowSimulator::init(Camera *camera, Shader *shader, glm::mat4 model) {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
 
-  float vs = 0.2;
+  float vs = 5;
   GLfloat cube_vertices[] = {
-          -vs, -vs, -vs,   -vs, -vs,  vs,   -vs,  vs,  vs,   -vs,  vs, -vs,
-          vs, -vs, -vs,    vs, -vs,  vs,    vs,  vs,  vs,    vs,  vs, -vs,
-          -vs, -vs, -vs,   -vs, -vs,  vs,    vs, -vs,  vs,    vs, -vs, -vs,
-          -vs,  vs, -vs,   -vs,  vs,  vs,    vs,  vs,  vs,    vs,  vs, -vs,
-          -vs, -vs, -vs,   -vs,  vs, -vs,    vs,  vs, -vs,    vs, -vs, -vs,
-          -vs, -vs,  vs,   -vs,  vs,  vs,    vs,  vs,  vs,    vs, -vs,  vs
+    -vs,-vs,-vs, // triangle 1 : begin
+    -vs,-vs, vs,
+    -vs, vs, vs, // triangle 1 : end
+    vs, vs,-vs, // triangle 2 : begin
+    -vs,-vs,-vs,
+    -vs, vs,-vs, // triangle 2 : end
+    vs,-vs, vs,
+    -vs,-vs,-vs,
+    vs,-vs,-vs,
+    vs, vs,-vs,
+    vs,-vs,-vs,
+    -vs,-vs,-vs,
+    -vs,-vs,-vs,
+    -vs, vs, vs,
+    -vs, vs,-vs,
+    vs,-vs, vs,
+    -vs,-vs, vs,
+    -vs,-vs,-vs,
+    -vs, vs, vs,
+    -vs,-vs, vs,
+    vs,-vs, vs,
+    vs, vs, vs,
+    vs,-vs,-vs,
+    vs, vs,-vs,
+    vs,-vs,-vs,
+    vs, vs, vs,
+    vs,-vs, vs,
+    vs, vs, vs,
+    vs, vs,-vs,
+    -vs, vs,-vs,
+    vs, vs, vs,
+    -vs, vs,-vs,
+    -vs, vs, vs,
+    vs, vs, vs,
+    -vs, vs, vs,
+    vs,-vs, vs
   };
 
   glGenVertexArrays(1, &particle_VAO);
@@ -213,10 +243,8 @@ void SnowSimulator::drawParticles(glm::vec4 color) {
     shader->setVec4("in_color", color);
     shader->setMat4("model", particle_model);
     glBindVertexArray(particle_VAO);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 24);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
   }
-
-
 }
 
 void SnowSimulator::drawGridForces() {
