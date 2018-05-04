@@ -9,6 +9,7 @@
 #include "grid.h"
 #include "collision/plane.h"
 #include "collision/sphere.h"
+#include "collision/rectangle.h"
 
 using namespace std;
 
@@ -39,7 +40,9 @@ void SnowSimulator::loadGrid(struct Grid *grid) {
   this->grid = grid;
 }
 
-void SnowSimulator::loadCollisionObjects(vector<CollisionObject *> *objects) { this->collision_objects = objects; }
+void SnowSimulator::loadCollisionObjects(vector<CollisionObject *> *objects) {
+  this->collision_objects = objects;
+}
 
 /**
  * Initializes the cloth simulation and spawns a new thread to separate
@@ -194,12 +197,19 @@ void SnowSimulator::init(Camera *camera, Shader *shader, glm::mat4 model) {
 
 
 void SnowSimulator::drawContents() {
-  // TODO
   glEnable(GL_DEPTH_TEST);
 
   if (!is_paused) {
     clock_t start = clock();
     for (int i = 0; i < simulation_steps; i++) {
+      // Not sure about the order of these updates:
+      for (CollisionObject* co : *collision_objects) {
+        if (!co->is_stationary()) {
+          // TODO: make an abstract class called MovableCollisionObject for casting
+          Rectangle* rect = (Rectangle*) co;
+          rect->update_position(delta_t);
+        }
+      }
       grid->simulate(delta_t, external_accelerations, collision_objects, params);
     }
     double duration = (clock() - start) / (double) CLOCKS_PER_SEC;

@@ -7,25 +7,30 @@
 
 using namespace glm;
 
+/**
+* Everything happens in world space... except for collisions, which
+* for some godforsaken reason happen in model space.
+*/
 struct Rectangle : public CollisionObject {
 public:
-  Rectangle(vec3 &in_origin, vec3 &edge_u, vec3 &edge_v, float mu, mat4 model, mat4 worldtomodel, vec4 color)
+  Rectangle(vec3 &origin_world, vec3 &edge_u, vec3 &edge_v, float mu, mat4 model, mat4 worldtomodel, vec4 color)
     : edge_u(edge_u), edge_v(edge_v), mu(mu), modeltoworld(model), worldtomodel(worldtomodel), color(color) {
       // Check if rectangle is valid: edges must be orthogonal
       if (abs(dot(edge_u, edge_v)) > 0) {
         throw "bad rectangle";
       }
 
-      origin = vec3(worldtomodel * vec4(in_origin, 1.0));
+      origin = origin_world;
       normal = normalize(cross(edge_u, edge_v));
 
-      vec3 point1 = origin + edge_u;
-      vec3 point2 = origin + edge_u + edge_v;
-      vec3 point3 = origin + edge_v;
+      vec3 point0 = vec3();
+      vec3 point1 = edge_u;
+      vec3 point2 = edge_u + edge_v;
+      vec3 point3 = edge_v;
 
-      vertices[0] = origin.x;
-      vertices[1] = origin.y;
-      vertices[2] = origin.z;
+      vertices[0] = point0.x;
+      vertices[1] = point0.y;
+      vertices[2] = point0.z;
       vertices[3] = point1.x;
       vertices[4] = point1.y;
       vertices[5] = point1.z;
@@ -35,7 +40,6 @@ public:
       vertices[9] = point3.x;
       vertices[10] = point3.y;
       vertices[11] = point3.z;
-
       glGenVertexArrays(1, &VAO);
       glGenBuffers(1, &VBO);
       glBindVertexArray(VAO);
@@ -47,14 +51,21 @@ public:
 
   void render(Shader *shader);
   vec3 collide(vec3 position, vec3 next_position, vec3 velocity);
+  bool is_stationary();
+  void set_velocity(vec3 velocity);
+  void update_position(float delta_t);
 
 private:
+  void write_vertices();
+
   // For collision
   vec3 origin;
   vec3 edge_u;
   vec3 edge_v;
   vec3 normal;
   float mu;     // friction coefficient
+
+  vec3 velocity;
 
   // For rendering
   const int static num_vertices = 4;

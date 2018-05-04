@@ -9,6 +9,7 @@ class CollisionObject {
 public:
   virtual void render(Shader* shader) = 0;
   virtual vec3 collide(vec3 position, vec3 next_position, vec3 velocity) = 0;
+  virtual bool is_stationary() = 0;
 
 private:
   double friction;

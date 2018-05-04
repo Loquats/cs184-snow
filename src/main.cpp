@@ -288,8 +288,18 @@ int main(int argc, char **argv)
   float mu = 0.2;
   Rectangle* wedge_rect1 = new Rectangle(corner, top_edge, edge1, mu, modeltoworld, worldtomodel, wedge_color);
   Rectangle* wedge_rect2 = new Rectangle(corner, top_edge, edge2, mu, modeltoworld, worldtomodel, wedge_color);
+  // wedge_rect2->set_velocity(vec3(0, 0.01, 0));
   objects.push_back(wedge_rect1);
   objects.push_back(wedge_rect2);
+
+  // Make the snowplow
+  vec4 plow_color(1.0, 0.95, 0.45, 1.0);
+  vec3 plow_origin = origin + vec3(0.1*dim_x, 0, 0.1*dim_z);
+  vec3 plow_width(0, 0, 0.5 * dim_z);
+  vec3 plow_height(0, 0.25*dim_y, 0);
+  Rectangle* plow_rect = new Rectangle(plow_origin, plow_width, plow_height, mu, modeltoworld, worldtomodel, plow_color);
+  // plow_rect->set_velocity(vec3(10, 0, 0));
+  objects.push_back(plow_rect);
 
   baseshader.use();
   snowsim->init(&camera, &baseshader, modeltoworld);
