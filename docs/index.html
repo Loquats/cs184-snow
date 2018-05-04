@@ -14,6 +14,10 @@
   h1, h2, h3, h4 {
     font-family: 'Source Sans Pro', sans-serif;
   }
+  h2 {
+    margin-top:5px;
+    margin-bottom:5px;
+  }
     img {
         width: 500px;
     }
@@ -34,43 +38,19 @@
 <h2 align="middle">Brandon Huang, cs184-afi, SID: 25523652</h2>
 <h2 align="middle">Ankit Patel, cs184-agy, SID: 25249884</h2>
 
-  <a href="https://docs.google.com/presentation/d/1IT0-4yi4-pNzRLLte77J_rZw__gL6BBmgZNKMCYTKHM/edit?usp=sharing">
-    <h2 align="middle">Presentation Slides</h2>
-  </a>
-  <div align="middle">
-    (You must log into a berkeley.edu Google account to view slides.)
-  </div>
+<br>
+  <h2 align="middle">Abstract</h2>
 
-  <h2 align="middle">Technical Progress</h2>
+  <h2 align="middle">Technical Approach</h2>
   <h3>Physical Simulation</h3>
-  We are in the process of implementing the material point method (MPM) for physical simulation of snow. MPM combines the Lagrangian and Eulerian perspective of physical simulation, and considers snow both as point particles moving through space, as well as computes forces and velocities on a 3D grid space. The steps that we've implemented so far are:
-  <ol>
-    <li> Interpolate particle states to the grid. We use a cubic b-spline to interpolate the mass and velocity of each particle onto the 3D grid. Each particle affects multiple grid cells, in its neighborhood. 
-    <li> Compute the volume and density of each particle. This is done once in the entire simulation. The density of each grid cell is computed, and this is interpolated to particles using the same b-spline weights as part 1.
-    <li> Compute grid forces. Forces are first computed on each grid cell based on the elastic potential energy of particles in its neighborhood. 
-    <li> Compute grid velocities. The velocity of each grid cell can be computed from its force. We are in the process of implementing this.
-  </ol>
+  <h3>Rendering</h3>
+  <h3>Problems</h3>
+  <h3>Lessons Learned</h3>
 
-  <h3>OpenGL Rendering</h3>
-  So far, we've spent most of our time implementing the physical simulation. We have a basic OpenGL rendering implementation that renders snow particles as points in space. Refer to video for particle rendering results. 
+  <h2 align="middle">Results</h2>
 
-  <h2 align="middle">Current Progress Overview</h2>
-<ol>
-    <li>Basic codebase is set up and rendering now possible.</li>
-    <li>Our original plan was to have snow simulation working in some capacity by the end of this week. We are on track to finish implementing the MPM update procedure by the end of this week, but it remains to be seen whether our simulation code will be efficient or stable enough to display visually plausible dynamics.</li>
-</ol>
+  <h2 align="middle">Contribution Breakdown</h2>
 
-<h2 align="middle">Updates to Work Plan</h2>
-<ol>
-    <li>We realized that rendering points is possible in OpenGL, and will probably be the most efficient way to render our snow particles. This removes a major hurdle because the paper uses a volumetric path tracer and we didn't want to deal with that complexity (at least for our bare minimum deliverables), but were unsure of what would be a good alternative.</li>
-    <li>We do still need to add code for collidable objects (spheres, meshes), and will probably implement that alongisde the grid-based and particle-based collision steps in the MPM update.</li>
-    <li>We realized that a 3D array to represent the grid may be too wasteful of memory if the snow particles are very far apart. It may be necessary to use a more sophisticated data structure such as an oct-tree for grid node lookup, and we will add this to the work plan if the need becomes evident.</li>
-</ol>
-
-  <h2 align="middle">Video</h2>
-  <div align="middle">
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/DpK-o4tiJ2I?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-  </div>
-
+  <h2 align="middle">References</h2>
 </body>
 </html>

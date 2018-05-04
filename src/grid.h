@@ -3,8 +3,10 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <thread>
 #include "particle.h"
 #include "collision/collisionObject.h"
+#include "misc/threadpool.h"
 #include "misc/physics_params.h"
 #include <set>
 
@@ -28,11 +30,15 @@ public:
 
   int dim_x, dim_y, dim_z;
   float h;
+  ThreadPool* thread_pool;
 	Grid(int dim_x, int dim_y, int dim_z, float grid_h): h(grid_h) {
-        this->dim_x = dim_x;
-        this->dim_y = dim_y;
-        this->dim_z = dim_z;
-        first_step = true;
+
+    num_threads = std::thread::hardware_concurrency();
+		thread_pool = new ThreadPool(num_threads);
+    this->dim_x = dim_x;
+    this->dim_y = dim_y;
+    this->dim_z = dim_z;
+    first_step = true;
 		nodes = vector<vector<vector<GridNode *> > >(dim_x);
 		for (int i = 0; i < dim_x; ++i) {
 			nodes[i] = vector<vector<GridNode *> >(dim_y);
@@ -43,8 +49,11 @@ public:
 	};
     vector<vector<vector<GridNode *> > > nodes; // eventually should probably make this private
 	vector<Particle *> all_particles;
+	int num_threads;
+	void particle_parallel_for(void (*f)(Particle*));
+	void gridnode_parallel_for(void (*f)(GridNode*));
+	static void reset_grid_worker(Particle * particle);
 	set<GridNode *> nodes_in_use;
-//	set<GridNode *> nodes_to_keep;
 	bool first_step = true;
 	int steps_since_node_reset = 0;
 
