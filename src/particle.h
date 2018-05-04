@@ -7,13 +7,15 @@
 
 class Particle {
 public:
-  Particle(glm::vec3 position, float mass): 
-    position(position), mass(mass), velocity(glm::vec3(0)) {};
+  Particle(glm::vec3 position, float mass, glm::vec3 dim, float h):
+    position(position), mass(mass), velocity(glm::vec3(0)), dim(dim), h(h) {};
 
   glm::vec3 position;
   glm::vec3 velocity;
   float mass;
   float volume;
+  glm::vec3 dim;
+  float h;
 
   glm::mat3 deformation_grad_E;
   glm::mat3 deformation_grad_P;
@@ -36,16 +38,16 @@ public:
   float b_spline_val[4][4][4];
   glm::vec3 b_spline_grad_val[4][4][4];
 
-  void compute_neighborhood_bounds(int dim_x, int dim_y, int dim_z, float h) {
+  void compute_neighborhood_bounds() {
     i_lo = std::max((int) ceil(position.x / h - 2), 0);
-    i_hi = std::min((int) floor(position.x / h + 2) + 1, (int) dim_x);
+    i_hi = std::min((int) floor(position.x / h + 2) + 1, (int) dim.x);
     j_lo = std::max((int) ceil(position.y / h - 2), 0);
-    j_hi = std::min((int) floor(position.y / h + 2) + 1, (int) dim_y);
+    j_hi = std::min((int) floor(position.y / h + 2) + 1, (int) dim.y);
     k_lo = std::max((int) ceil(position.z / h - 2), 0);
-    k_hi = std::min((int) floor(position.z / h + 2) + 1, (int) dim_z);
+    k_hi = std::min((int) floor(position.z / h + 2) + 1, (int) dim.z);
   }
 
-  void compute_b_spline_grad(float h) {
+  void compute_b_spline_grad() {
     for (int dest_i = i_lo; dest_i < i_hi; ++dest_i) {
       for (int dest_j = j_lo; dest_j < j_hi; ++dest_j) {
         for (int dest_k = k_lo; dest_k < k_hi; ++dest_k) {

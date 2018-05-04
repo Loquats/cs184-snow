@@ -3,8 +3,10 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <thread>
 #include "particle.h"
 #include "collision/collisionObject.h"
+#include "misc/threadpool.h"
 
 using namespace std;
 using namespace glm;
@@ -24,11 +26,16 @@ public:
 
   int dim_x, dim_y, dim_z;
   float h;
+  ThreadPool* thread_pool;
 	Grid(int dim_x, int dim_y, int dim_z, float grid_h): h(grid_h) {
-        this->dim_x = dim_x;
-        this->dim_y = dim_y;
-        this->dim_z = dim_z;
-        first_step = true;
+
+    thread_pool = new ThreadPool(4);
+    num_threads = std::thread::hardware_concurrency();
+    ThreadPool pool(num_threads);
+    this->dim_x = dim_x;
+    this->dim_y = dim_y;
+    this->dim_z = dim_z;
+    first_step = true;
 		nodes = vector<vector<vector<GridNode *> > >(dim_x);
 		for (int i = 0; i < dim_x; ++i) {
 			nodes[i] = vector<vector<GridNode *> >(dim_y);
@@ -43,7 +50,11 @@ public:
 	};
     vector<vector<vector<GridNode *> > > nodes; // eventually should probably make this private
 	vector<Particle *> all_particles;
+	int num_threads;
+//	ThreadPool thread_pool(4);
 	bool first_step;
+	void particle_parallel_for(void (*f)(Particle*));
+	static void reset_grid_worker(Particle * particle);
 
 	void resetGrid();
 	void loadParticles(vector<Particle *> particles) { this->all_particles = particles; };
