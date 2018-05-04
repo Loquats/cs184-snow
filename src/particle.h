@@ -14,6 +14,7 @@ public:
   glm::vec3 velocity;
   float mass;
   float volume;
+  float cbrt_volume;
 
   glm::mat3 deformation_grad_E;
   glm::mat3 deformation_grad_P;

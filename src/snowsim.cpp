@@ -111,7 +111,7 @@ void SnowSimulator::init(Camera *camera, Shader *shader, glm::mat4 model) {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
 
-  float vs = 5;
+  float vs = 0.5;
   GLfloat cube_vertices[] = {
     -vs,-vs,-vs, // triangle 1 : begin
     -vs,-vs, vs,
@@ -239,7 +239,11 @@ void SnowSimulator::drawParticles(glm::vec4 color) {
   vector<Particle *>& all_particles = grid->all_particles;
 
   for(Particle* particle : all_particles) {
-    glm::mat4 particle_model = glm::translate(modeltoworld, particle->position);
+    float len = particle->cbrt_volume;
+    glm::mat4 particle_model;
+    particle_model = glm::scale(particle_model, glm::vec3(len, len, len));
+    particle_model = modeltoworld * particle_model;
+    particle_model = glm::translate(glm::mat4(), particle->position) * particle_model;
     shader->setVec4("in_color", color);
     shader->setMat4("model", particle_model);
     glBindVertexArray(particle_VAO);

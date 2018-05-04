@@ -17,6 +17,8 @@
 #include "collision/rectangle.h"
 #include "misc/sampling.h"
 
+using namespace std;
+
 int SCR_WIDTH = 800;
 int SCR_HEIGHT = 600;
 // camera
@@ -32,8 +34,6 @@ float lastFrame = 0.0f;
 GLFWwindow *window = nullptr;
 
 SnowSimulator *snowsim;
-
-using namespace std;
 
 static void error_callback(int error, const char* description)
 {

@@ -123,6 +123,7 @@ void Grid::compute_particle_volumes() {
     }
     density /= h3;
     particle->volume = particle->mass / density;
+    particle->cbrt_volume = cbrt(particle->volume);
   }
 }
 
