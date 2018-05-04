@@ -247,11 +247,19 @@ int main(int argc, char **argv)
 
   glGetError(); // pull and ignore unhandled errors like GL_INVALID_ENUM
 
-  int dim_x = 60;
-  int dim_y = 60;
-  int dim_z = 60;
+  int dim_x = 240;
+  int dim_y = 240;
+  int dim_z = 240;
   vec3 dim(dim_x, dim_y, dim_z);
   float h = 1.0;
+
+  cout << "Grid parameters\n";
+  cout << "===============" << endl;
+  cout << "dim_x: " << dim_x << endl;
+  cout << "dim_y: " << dim_y << endl;
+  cout << "dim_z: " << dim_z << endl;
+  cout << "h: " << h << endl;
+  cout << endl << endl;
 
   glm::mat4 worldtomodel;
   worldtomodel = glm::translate(worldtomodel, glm::vec3(dim.x / 2, dim.y / 2, dim.z / 2));

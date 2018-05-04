@@ -11,29 +11,90 @@ using namespace Eigen;
 using namespace glm;
 
 void Grid::resetGrid() {
-  for (int i = 0; i < dim_x; ++i) {
-      for (int j = 0; j < dim_y; ++j) {
-          for (int k = 0; k < dim_z; ++k) {
-              nodes[i][j][k]->mass = 0;
-              nodes[i][j][k]->velocity = vec3(0.0);
-              nodes[i][j][k]->next_velocity = vec3(0.0);
-              nodes[i][j][k]->force = vec3(0.0);
-              nodes[i][j][k]->particles.clear();
-          }
-      }
-  }
-  for (Particle *particle : all_particles) {
-    // I'm not 100% sure rounding is the right thing to do, but the b-spline is centered on the grid index itself so I think it's right
-    // Gonna use floor for now to be consistent with the rest of the code
-    // TODO: figure this out
-    ivec3 index = glm::floor(particle->position); 
-    nodes[index.x][index.y][index.z]->particles.push_back(particle);
-    particle->compute_neighborhood_bounds(dim_x, dim_y, dim_z, h);
-    particle->compute_b_spline_grad(h);
-  }
+
+    for (GridNode *node : nodes_in_use) {
+        node->mass = 0;
+        node->velocity = vec3(0.0);
+        node->next_velocity = vec3(0.0);
+        node->force = vec3(0.0);
+        node->particles.clear();
+    }
+    for (Particle *particle : all_particles) {
+        // I'm not 100% sure rounding is the right thing to do, but the b-spline is centered on the grid index itself so I think it's right
+        // Gonna use floor for now to be consistent with the rest of the code
+        ivec3 index = glm::floor(particle->position);
+
+        // We need to compute the new neighborhood bounds before we try instantiating needed GridNodes in the interpolation radius.
+        particle->compute_neighborhood_bounds(dim_x, dim_y, dim_z, h);
+        particle->compute_b_spline_grad(h);
+        for (int dest_i = particle->i_lo; dest_i < particle->i_hi; ++dest_i) {
+            for (int dest_j = particle->j_lo; dest_j < particle->j_hi; ++dest_j) {
+                for (int dest_k = particle->k_lo; dest_k < particle->k_hi; ++dest_k) {
+                    if (nodes[dest_i][dest_j][dest_k] == NULL) {
+                        GridNode *node = new GridNode();
+                        node->index = ivec3(dest_i, dest_j, dest_k);
+                        nodes[dest_i][dest_j][dest_k] = node;
+                        nodes_in_use.push_back(node);
+                    }
+                }
+            }
+        }
+        // We need to instantiate the nodes that are to be in use, before we try pushing the particle
+        nodes[index.x][index.y][index.z]->particles.push_back(particle);
+    }
+
+}
+
+// Particles move over time and nodes fall in and out of
+void Grid::pruneUnusedNodes() {
+
+    for (GridNode *node : nodes_in_use) {
+        node->mass = 0;
+        node->velocity = vec3(0.0);
+        node->next_velocity = vec3(0.0);
+        node->force = vec3(0.0);
+        node->particles.clear();
+    }
+
+    cout << "pruning nodes" << endl;
+
+    for (Particle *particle : all_particles) {
+        ivec3 index = glm::floor(particle->position);
+        particle->compute_neighborhood_bounds(dim_x, dim_y, dim_z, h);
+        for (int dest_i = particle->i_lo; dest_i < particle->i_hi; ++dest_i) { // iterate over everything in interpolation radius
+            for (int dest_j = particle->j_lo; dest_j < particle->j_hi; ++dest_j) {
+                for (int dest_k = particle->k_lo; dest_k < particle->k_hi; ++dest_k) {
+                    GridNode *node = nodes[dest_i][dest_j][dest_k];
+                    if (node != NULL) { // if NULL, we deal with it in resetGrid
+                        nodes_to_keep.insert(node); // pointers naturally are comparable for a set
+                    }
+                }
+            }
+        }
+    }
+
+    int old_size = nodes_in_use.size();
+    int new_size = nodes_to_keep.size();
+    nodes_in_use.clear();
+    for (GridNode *node : nodes_to_keep) {
+        nodes_in_use.push_back(node);
+    }
+    nodes_to_keep.clear();
+
+    cout << "nodes before pruning: " << old_size << endl;
+    cout << "nodes after pruning: " << new_size << endl;
 }
 
 void Grid::simulate(float delta_t, vector<vec3> external_accelerations, vector<CollisionObject *> *collision_objects, PhysicsParams* params) {
+
+    // Pruning does not yet work. Leaving it commented for now
+
+//    ++steps_since_node_reset;
+//    if (steps_since_node_reset > reset_time / delta_t) {
+//        pruneUnusedNodes();
+//        steps_since_node_reset = 0;
+//    }
+
     resetGrid();
     particle_to_grid();                       // Step 1.
     if (first_step) {
@@ -87,14 +148,10 @@ void Grid::particle_to_grid() {
   }
 
   // Normalize grid velocity by its mass all at once
-  for (int i = 0; i < dim_x; ++i) {
-    for (int j = 0; j < dim_y; ++j) {
-      for (int k = 0; k < dim_z; ++k) {
-        if (nodes[i][j][k]->mass > 0) {
-          nodes[i][j][k]->velocity /= nodes[i][j][k]->mass;
-        }
+  for (GridNode *node : nodes_in_use) {
+      if (node->mass > 0) {
+          node->velocity /= node->mass;
       }
-    }
   }
 }
 
@@ -185,22 +242,17 @@ void Grid::apply_ext_accelerations(vector<vec3> external_accelerations) {
  * Step 4 and 5: update grid node velocities, do collisions
  */
 void Grid::compute_grid_velocities(float delta_t, vector<CollisionObject *> *collision_objects) {
-  for (int i = 0; i < dim_x; ++i) {
-    for (int j = 0; j < dim_y; ++j) {
-      for (int k = 0; k < dim_z; ++k) {
-        GridNode* node = nodes[i][j][k];
+    for (GridNode *node : nodes_in_use) {
         node->next_velocity = node->velocity;
         if (node->mass > 0) {
-          node->next_velocity += node->force * delta_t / node->mass;
+            node->next_velocity += node->force * delta_t / node->mass;
         }
         vec3 position = node->index * h;
         vec3 next_position = position + node->velocity * delta_t;
         for (CollisionObject* co : *collision_objects) {
-          // node->next_velocity = co->collide(position, next_position, node->next_velocity);
+            // node->next_velocity = co->collide(position, next_position, node->next_velocity);
         }
-      }
     }
-  }
 }
 
 /*

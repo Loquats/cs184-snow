@@ -6,9 +6,12 @@
 #include "particle.h"
 #include "collision/collisionObject.h"
 #include "misc/physics_params.h"
+#include <set>
 
 using namespace std;
 using namespace glm;
+
+const float reset_time = 0.25; // seconds of simulation to reset grid nodes
 
 struct GridNode {
 	vec3 index;	// the {i, j, k} index of the grid node
@@ -35,17 +38,17 @@ public:
 			nodes[i] = vector<vector<GridNode *> >(dim_y);
 			for (int j = 0; j < dim_y; ++j) {
 				nodes[i][j] = vector<GridNode *>(dim_z);
-				for (int k = 0; k < dim_z; ++k) {
-					nodes[i][j][k] = new GridNode();
-					nodes[i][j][k]->index = vec3(i, j, k);
-				}
 			}
 		}
 	};
     vector<vector<vector<GridNode *> > > nodes; // eventually should probably make this private
 	vector<Particle *> all_particles;
-	bool first_step;
+	vector<GridNode *> nodes_in_use;
+	set<GridNode *> nodes_to_keep;
+	bool first_step = true;
+	int steps_since_node_reset = 0;
 
+    void pruneUnusedNodes();
 	void resetGrid();
 	void loadParticles(vector<Particle *> particles) { this->all_particles = particles; };
 	void simulate(float delta_t, vector<vec3> external_accelerations, vector<CollisionObject *> *collision_objects, PhysicsParams* params);
