@@ -21,7 +21,7 @@ void createSphereUniformParticles(Grid *grid, int num_particles, float radius) {
 
 void createTower(Grid *grid, int num_particles) {
     vec3 grid_dim = vec3(grid->dim_x, grid->dim_y, grid->dim_z);
-    vec3 tower_dim = vec3(grid_dim.x * 0.2, grid_dim.y * 0.5, grid_dim.z * 0.2);
+    vec3 tower_dim = vec3(grid_dim.x * 0.2, grid_dim.y * 0.4, grid_dim.z * 0.2);
     vec3 tower_origin = vec3(grid_dim.x - tower_dim.x, 0.0, grid_dim.z - tower_dim.z) / 2.0f;
 
     for (int i = 0; i < num_particles; i++) {

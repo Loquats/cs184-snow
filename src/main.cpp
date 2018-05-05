@@ -15,6 +15,7 @@
 #include "snowsim.h"
 #include "collision/plane.h"
 #include "collision/rectangle.h"
+#include "collision/cube.h"
 #include "misc/sampling.h"
 
 using namespace std;
@@ -335,13 +336,23 @@ int main(int argc, char **argv)
 //  Rectangle* wedge_rect1 = new Rectangle(corner, top_edge, edge1, mu, modeltoworld, worldtomodel, wedge_color);
 
   // Make the snowplow
-  vec4 plow_color(1.0, 0.95, 0.45, 1.0);
-  vec3 plow_origin = origin + vec3(0.1*grid->dim_x, -0.1*grid->dim_y, 0.1*grid->dim_z);
-  vec3 plow_width(0, 0, 0.5 * grid->dim_z);
-  vec3 plow_height(0, 0.25*grid->dim_y, 0);
-  Rectangle* plow_rect = new Rectangle(plow_origin, plow_width, plow_height, 0.2, modeltoworld, worldtomodel, plow_color);
-  plow_rect->set_velocity(vec3(grid->dim_x * 0.2, 0, 0));
-  objects.push_back(plow_rect);
+  // vec4 plow_color(1.0, 0.95, 0.45, 1.0);
+  // vec3 plow_origin = origin + vec3(0.1*grid->dim_x, -0.1*grid->dim_y, 0.1*grid->dim_z);
+  // vec3 plow_width(0, 0, 0.5 * grid->dim_z);
+  // vec3 plow_height(0, 0.25*grid->dim_y, 0);
+  // Rectangle* plow_rect = new Rectangle(plow_origin, plow_width, plow_height, 0.2, modeltoworld, worldtomodel, plow_color);
+  // plow_rect->set_velocity(vec3(grid->dim_x * 0.2, 0, 0));
+  // objects.push_back(plow_rect);
+
+  // Make the cube
+  // vec4 cube_color(0.05, 0.05, 0.05, 0.9);
+  // vec3 cube_origin = origin + vec3(0.01*grid->dim_x, 0.15*grid->dim_y, 0.45*grid->dim_z);
+  // vec3 cube_u(0.1 * grid->dim_x, 0, 0);
+  // vec3 cube_v(0, 0.1*grid->dim_y, 0);
+  // vec3 cube_w(0, 0, 0.1*grid->dim_z);
+  // Cube* cube = new Cube(cube_origin, cube_u, cube_v, cube_w, 0.2, modeltoworld, worldtomodel, cube_color);
+  // cube->set_velocity(vec3(grid->dim_x * 5.0, 0, 0));
+  // objects.push_back(cube);
 
   baseshader.use();
   snowsim->init(&camera, &baseshader, modeltoworld);

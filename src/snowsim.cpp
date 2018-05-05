@@ -205,9 +205,7 @@ void SnowSimulator::drawContents() {
       // Not sure about the order of these updates:
       for (CollisionObject* co : *collision_objects) {
         if (!co->is_stationary()) {
-          // TODO: make an abstract class called MovableCollisionObject for casting
-          Rectangle* rect = (Rectangle*) co;
-          rect->update_position(delta_t);
+          co->update_position(delta_t);
         }
       }
       grid->simulate(delta_t, external_accelerations, collision_objects, params);
