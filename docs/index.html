@@ -38,6 +38,10 @@
 <h2 align="middle">Brandon Huang, cs184-afi, SID: 25523652</h2>
 <h2 align="middle">Ankit Patel, cs184-agy, SID: 25249884</h2>
 
+<div align="middle">
+  <iframe width="660" height="415" src="https://www.youtube.com/embed/9fQxFRHo_Bs?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>
+
 <br>
   <h2 align="middle">Abstract</h2>
   <p>
@@ -62,6 +66,12 @@
     <li> Compute the volume and density of each particle. This is done once in the entire simulation. The density of each grid cell is computed, and this is interpolated to particles using the same b-spline weights as part 1.
     <li> Compute grid forces. Forces are first computed on each grid cell based on the elastic potential energy of particles in its neighborhood. 
     <li> Compute grid velocities. The velocity of each grid cell can be computed from its force. 
+    <li> Compute grid-based collisions. If the grid velocities cause particles to collide with any rigid objects, adjust its velocity so it does not pass through.
+    <li> Perform semi-implicit numerical integration. We skipped this step because we found this step to be quite difficult to understand, and instead, used explicit numerical integration from class. 
+    <li> Update the deformation gradient of each particle, which affects particle velocities indirectly.
+    <li> Update particle velocities. From the grid velocities computed earlier, a weighted average of PIC and FLIP updates are interpolated to particle velocities. 
+    <li> Compute particle-based collisions. Grid-based collisions are not entirely accurate, so we catch any improperly collided particles in this step.
+    <li> Update particle positions (finally!).
   </ol>
 
   <h3 align="middle">Rendering</h3>
@@ -172,11 +182,11 @@
       <table style="width=100%">
         <tr>
             <td>
-                <iframe width="560" height="315" src="LINK HERE" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/FIA1DGvAa6k?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
                 <figcaption align="middle">Low velocity collision</figcaption>
             </td>
             <td>
-                <iframe width="560" height="315" src="LINK HERE" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/8olToAAzO9Q?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
                 <figcaption align="middle">High velocity collision</figcaption>
             </td>
         </tr>
@@ -189,7 +199,7 @@
       <table style="width=100%">
         <tr>
             <td>
-                <iframe width="560" height="315" src="LINK HERE" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/eS-8OLE6C20?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
                 <figcaption align="middle">Snowplow</figcaption>
             </td>
         </tr>
@@ -202,7 +212,7 @@
       <table style="width=100%">
         <tr>
             <td>
-                <iframe width="560" height="315" src="LINK HERE" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/douHLD35eC8?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
                 <figcaption align="middle">Snowplow</figcaption>
             </td>
         </tr>
@@ -222,12 +232,12 @@
 
   <h2 align="middle">References</h2>
   <ol>
-    <li>http://alexey.stomakhin.com/research/snow.html</li>
-    <li>https://learnopengl.com/</li>
-    <li>https://github.com/Dav1dde/glad</li>
-    <li>http://www.glfw.org/docs/latest/quick.html</li>
-    <li>https://glm.g-truc.net/0.9.8/index.html</li>
-    <li>http://eigen.tuxfamily.org/index.php?title=Main_Page</li>
+    <li>Stomakhin's original paper, 2013: http://alexey.stomakhin.com/research/snow.html</li>
+    <li>OpenGL tutorial: https://learnopengl.com/</li>
+    <li>GLAD: https://github.com/Dav1dde/glad</li>
+    <li>GLFW: http://www.glfw.org/docs/latest/quick.html</li>
+    <li>GLM: https://glm.g-truc.net/0.9.8/index.html</li>
+    <li>Eigen: http://eigen.tuxfamily.org/index.php?title=Main_Page</li>
   </ol>
 
   <div align="middle">
