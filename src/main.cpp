@@ -317,17 +317,16 @@ int main(int argc, char **argv)
   objects.push_back(wall_rect4);
 
 //  // Make the wedge
-//  vec4 wedge_color = vec4(0.5f, 0.5f, 0.5f, 0.5f);
-//  vec3 corner(0,-0.05*grid->dim_y,-grid->dim_z/2);
-//  vec3 top_edge(0, 0, 0.8 * grid->dim_z);
-//  vec3 edge1(0.15*grid->dim_x, -0.15*grid->dim_y, 0);
-//  vec3 edge2(-0.15*grid->dim_x, -0.15*grid->dim_y, 0);
-//  float mu = 0.2;
-//  Rectangle* wedge_rect1 = new Rectangle(corner, top_edge, edge1, mu, modeltoworld, worldtomodel, wedge_color);
-//  Rectangle* wedge_rect2 = new Rectangle(corner, top_edge, edge2, mu, modeltoworld, worldtomodel, wedge_color);
-//  wedge_rect2->set_velocity(vec3(0, 0.10, 0));
-//  objects.push_back(wedge_rect1);
-//  objects.push_back(wedge_rect2);
+ vec4 wedge_color = vec4(0.5f, 0.5f, 0.5f, 0.95f);
+ vec3 corner(0,-0.05*grid->dim_y,-grid->dim_z/2);
+ vec3 top_edge(0, 0, 0.8 * grid->dim_z);
+ vec3 edge1(0.15*grid->dim_x, -0.15*grid->dim_y, 0);
+ vec3 edge2(-0.15*grid->dim_x, -0.15*grid->dim_y, 0);
+ Rectangle* wedge_rect1 = new Rectangle(corner, top_edge, edge1, 0.5, modeltoworld, worldtomodel, wedge_color);
+ Rectangle* wedge_rect2 = new Rectangle(corner, top_edge, edge2, 0.5, modeltoworld, worldtomodel, wedge_color);
+ // wedge_rect2->set_velocity(vec3(0, 0.10, 0));
+ objects.push_back(wedge_rect1);
+ objects.push_back(wedge_rect2);
 
 //    vec4 wedge_color = vec4(0.5f, 0.5f, 0.5f, 0.5f);
 //    vec3 corner(0,-0.05*grid->dim_y,-grid->dim_z/2);
