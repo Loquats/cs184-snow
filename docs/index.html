@@ -40,12 +40,19 @@
 
 <br>
   <h2 align="middle">Abstract</h2>
+  We present an implementation of the Material Point Method (MPM) for simulation of snow dynamics in graphics applications. Snow is extremely challenging to simulate because it has materials characteristic of both liquids and solids. MPM offers us a reasonable runtime and control over some intuitive properties of the material. We show that plausible results can be obtained even with relatively coarse particle and grid resolution, and (insert other stuff here).
 
   <h2 align="middle">Technical Approach</h2>
-  <h3>Physical Simulation</h3>
-  <h3>Rendering</h3>
-  <h3>Problems</h3>
-  <h3>Lessons Learned</h3>
+  <div align="center">
+    <img src="resources/mpm-overview.png"/>
+    <figcaption>Overview of MPM. Particle mass and velocity are interpolated onto a grid, where computations occur. The resulting velocities are interpolated back onto the particles.</figcaption>
+  </div>
+  There are many ways to simulate snow, each with strengths and weaknesses. Mesh based methods have significant trouble modeling fracture, because of the need to explicitly define fracture of a contiguous solid. Pure grid based methods struggle with plasticity because deforming a grid results in a great deal of nonlinear computation. And particle-only methods suffer from inefficiency due to a high demand for nearest neighbor queries to compute dynamics. MPM solves these problems by using the grid as a "scratch-pad" for computations, maintaining state in a collection of particles with mass, volume, and velocity.
+
+  <h3 align="middle">Physical Simulation</h3>
+  <h3 align="middle">Rendering</h3>
+  <h2 align="middle">Problems</h3>
+  <h2 align="middle">Lessons Learned</h3>
 
   <h2 align="middle">Results</h2>
 

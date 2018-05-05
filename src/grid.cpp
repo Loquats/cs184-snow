@@ -47,6 +47,7 @@ void Grid::resetGrid() {
     for (Particle *particle : all_particles) {
         // I'm not 100% sure rounding is the right thing to do, but the b-spline is centered on the grid index itself so I think it's right
         // Gonna use floor for now to be consistent with the rest of the code
+        particle->position = glm::max(vec3(0.0), glm::min(particle->position, vec3(dim_x, dim_y, dim_z) - vec3(1e-5)));
         ivec3 index = glm::floor(particle->position / h);
 
         // We need to compute the new neighborhood bounds before we try instantiating needed GridNodes in the interpolation radius.
@@ -374,7 +375,6 @@ void Grid::compute_particle_collisions(float delta_t, vector<CollisionObject *> 
 void Grid::update_particle_positions(float delta_t) {
   for (Particle *particle : all_particles) {
     particle->position += particle->velocity * delta_t;
-    particle->position = glm::max(vec3(0.0), glm::min(particle->position, vec3(dim_x, dim_y, dim_z) - vec3(1e-5)));
   }
 }
 

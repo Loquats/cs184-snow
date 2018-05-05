@@ -253,11 +253,11 @@ int main(int argc, char **argv)
 
   glGetError(); // pull and ignore unhandled errors like GL_INVALID_ENUM
 
-  int res_x = 400;
-  int res_y = 100;
-  int res_z = 400;
+  int res_x = 20;
+  int res_y = 20;
+  int res_z = 20;
   vec3 dim(res_x, res_y, res_z);
-  float h = 0.05;
+  float h = 5. / res_y;
 
   cout << "Grid parameters\n";
   cout << "===============" << endl;
@@ -334,7 +334,7 @@ int main(int argc, char **argv)
   vec3 plow_width(0, 0, 0.5 * grid->dim_z);
   vec3 plow_height(0, 0.25*grid->dim_y, 0);
   Rectangle* plow_rect = new Rectangle(plow_origin, plow_width, plow_height, 0.2, modeltoworld, worldtomodel, plow_color);
-  plow_rect->set_velocity(vec3(3, 0, 0));
+  plow_rect->set_velocity(vec3(grid->dim_x * 0.2, 0, 0));
   objects.push_back(plow_rect);
 
   baseshader.use();
