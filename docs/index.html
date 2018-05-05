@@ -40,24 +40,65 @@
 
 <br>
   <h2 align="middle">Abstract</h2>
-  We present an implementation of the Material Point Method (MPM) for simulation of snow dynamics in graphics applications. Snow is extremely challenging to simulate because it has materials characteristic of both liquids and solids. MPM offers us a reasonable runtime and control over some intuitive properties of the material. We show that plausible results can be obtained even with relatively coarse particle and grid resolution, and (insert other stuff here).
+  <p>
+    We implement 3D snow simulation using the material point method (MPM) and a renderer in OpenGL. Snow is extremely challenging to simulate because it has material characteristics of both liquids and solids. The MPM simulation approach is implemented based on a 2013 paper by Stomakhin et al., and offers a reasonable runtime and control over some intuitive properties of the material. We show that plausible results can be obtained even with relatively coarse particle and grid resolution, and replicate some of the demonstrations from the original paper. We also implement basic 3D rendering of snow scenes, and iteratively implemented optimizations to improve simulation runtime.
+  </p>
 
   <h2 align="middle">Technical Approach</h2>
   <div align="center">
     <img src="resources/mpm-overview.png"/>
-    <figcaption>Overview of MPM. Particle mass and velocity are interpolated onto a grid, where computations occur. The resulting velocities are interpolated back onto the particles.</figcaption>
+    <figcaption>Overview of MPM. Particle mass and velocity are interpolated onto a grid, where most physics computations occur. The velocities at the next time step are interpolated back onto the particles.</figcaption>
   </div>
-  There are many ways to simulate snow, each with strengths and weaknesses. Mesh based methods have significant trouble modeling fracture, because of the need to explicitly define fracture of a contiguous solid. Pure grid based methods struggle with plasticity because deforming a grid results in a great deal of nonlinear computation. And particle-only methods suffer from inefficiency due to a high demand for nearest neighbor queries to compute dynamics. MPM solves these problems by using the grid as a "scratch-pad" for computations, maintaining state in a collection of particles with mass, volume, and velocity.
+  <p>
+    There are many ways to simulate snow, each with strengths and weaknesses. Mesh based methods have significant trouble modeling fracture, because of the need to explicitly define fracture of a contiguous solid. Pure grid based methods struggle with plasticity because deforming a grid results in a great deal of nonlinear computation. And particle-only methods suffer from inefficiency due to a high demand for nearest neighbor queries to compute dynamics. The material point method is a simulation method well-suited for continuum materials. MPM addresses these problems by using the grid as a "scratch-pad" for computations, while maintaining Lagrangian state as point particles with mass, volume, and velocity. MPM is mesh-free and avoids directly computing interactions between particles by interpolating particle properties onto a 3D grid, a computes physics on this grid.
+  </p>
 
   <h3 align="middle">Physical Simulation</h3>
+  <p>
+    Our simulator defines as primitives snow particles and rectangular/planar interactable collision objects. Our implementation of MPM closely resembles the implementation provided in the paper. Here is an overview of our approach, numbered consistently with the diagram above:
+  </p>
+  <ol>
+    <li> Interpolate particle states to the grid. We use a cubic b-spline to interpolate the mass and velocity of each particle onto the 3D grid. Each particle affects multiple grid cells, in its neighborhood. 
+    <li> Compute the volume and density of each particle. This is done once in the entire simulation. The density of each grid cell is computed, and this is interpolated to particles using the same b-spline weights as part 1.
+    <li> Compute grid forces. Forces are first computed on each grid cell based on the elastic potential energy of particles in its neighborhood. 
+    <li> Compute grid velocities. The velocity of each grid cell can be computed from its force. 
+  </ol>
+
   <h3 align="middle">Rendering</h3>
-  <h2 align="middle">Problems</h3>
-  <h2 align="middle">Lessons Learned</h3>
+
+  <h3 align="middle">Optimizations</h3>
+  <p>
+  - discretize and precompute scalar interpolation function
+  - save b-spline neighborhood weights for each particle per simulation step
+  - most grid cells are empty and not near any particles, so we only store grid cells that are actively being used, ie. within the neighborhood of a prticle
+  - threading
+  - compiler optimizations, by far one of the most effective
+  </p>
+  <h3 align="middle">Miscellaneous</h3>
+  <p>
+    Our implementation also provides a way to save simulations as videos. In addition to the live rendering, the program optionally saves the rendered frames into an .avi video file. This is especially useful for rendering at high grid resolution to improve physics accuracy, where each frame takes a few seconds or minutes to compute. 
+  </p>
+  <h3 align="middle">Problems</h3>
+  <p>
+    The biggest problem we encountered was runtime efficiency. Our initial implementation focused on getting everything to work, but was very inefficient, so after the initial implementation, we spent a lot of time rewriting the code for efficiency, as described in the "Optimization" section.
+  </p>
+  <p>
+    Another major challenge was CMake, and integrating/compiling the various libraries we used. This was our first time working with CMake. Each library seemed to have a slightly different way of integrating, and given our limited experience, figuring it the integration involved much trial and error. 
+  </p>
+  <h3 align="middle">Lessons Learned</h3>
 
   <h2 align="middle">Results</h2>
 
   <h2 align="middle">Contribution Breakdown</h2>
 
   <h2 align="middle">References</h2>
+  - snow paper
+  - snow paper tech report
+  - GLAD
+  _ GLFW
+  - GLM
+  - Eigen
+  - some threading library on github
+  - Sifakis svd?
 </body>
 </html>
