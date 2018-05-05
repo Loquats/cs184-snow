@@ -28,24 +28,28 @@ struct GridNode {
 class Grid {
 public:
 
-  int dim_x, dim_y, dim_z;
+  float dim_x, dim_y, dim_z;
+  int res_x, res_y, res_z;
   float h;
   ThreadPool* thread_pool;
-	Grid(int dim_x, int dim_y, int dim_z, float grid_h): h(grid_h) {
+	Grid(int res_x, int res_y, int res_z, float grid_h): h(grid_h) {
 
-    num_threads = std::thread::hardware_concurrency();
-		thread_pool = new ThreadPool(num_threads);
-    this->dim_x = dim_x;
-    this->dim_y = dim_y;
-    this->dim_z = dim_z;
-    first_step = true;
-		nodes = vector<vector<vector<GridNode *> > >(dim_x);
-		for (int i = 0; i < dim_x; ++i) {
-			nodes[i] = vector<vector<GridNode *> >(dim_y);
-			for (int j = 0; j < dim_y; ++j) {
-				nodes[i][j] = vector<GridNode *>(dim_z);
-			}
-		}
+        num_threads = std::thread::hardware_concurrency();
+            thread_pool = new ThreadPool(num_threads);
+        this->res_x = res_x;
+        this->res_y = res_y;
+        this->res_z = res_z;
+        dim_x = res_x * h;
+        dim_y = res_y * h;
+        dim_z = res_z * h;
+        first_step = true;
+        nodes = vector<vector<vector<GridNode *> > >(res_x);
+        for (int i = 0; i < res_x; ++i) {
+            nodes[i] = vector<vector<GridNode *> >(res_y);
+            for (int j = 0; j < res_y; ++j) {
+                nodes[i][j] = vector<GridNode *>(res_z);
+            }
+        }
 	};
     vector<vector<vector<GridNode *> > > nodes; // eventually should probably make this private
 	vector<Particle *> all_particles;

@@ -7,12 +7,12 @@
 
 class Particle {
 public:
-  Particle(glm::vec3 position, float mass, glm::vec3 dim, float h):
-    position(position), mass(mass), velocity(glm::vec3(0)), dim(dim), h(h) {};
+  Particle(glm::vec3 position, float mass, glm::vec3 res, float h):
+    position(position), mass(mass), velocity(glm::vec3(0)), res(res), h(h) {};
 
   glm::vec3 position;
   glm::vec3 velocity;
-  glm::vec3 dim;
+  glm::vec3 res;
   float mass;
   float volume;
   float h;
@@ -41,11 +41,11 @@ public:
 
   void compute_neighborhood_bounds() {
     i_lo = std::max((int) ceil(position.x / h - 2), 0);
-    i_hi = std::min((int) floor(position.x / h + 2) + 1, (int) dim.x);
+    i_hi = std::min((int) floor(position.x / h + 2) + 1, (int) res.x);
     j_lo = std::max((int) ceil(position.y / h - 2), 0);
-    j_hi = std::min((int) floor(position.y / h + 2) + 1, (int) dim.y);
+    j_hi = std::min((int) floor(position.y / h + 2) + 1, (int) res.y);
     k_lo = std::max((int) ceil(position.z / h - 2), 0);
-    k_hi = std::min((int) floor(position.z / h + 2) + 1, (int) dim.z);
+    k_hi = std::min((int) floor(position.z / h + 2) + 1, (int) res.z);
   }
 
   void compute_b_spline_grad() {
