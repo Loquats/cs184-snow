@@ -260,9 +260,9 @@ int main(int argc, char **argv)
 
   glGetError(); // pull and ignore unhandled errors like GL_INVALID_ENUM
 
-  int res_x = 30;
-  int res_y = 30;
-  int res_z = 30;
+  int res_x = 70;
+  int res_y = 70;
+  int res_z = 70;
   vec3 dim(res_x, res_y, res_z);
   float h = 5. / res_y;
 
@@ -309,7 +309,7 @@ int main(int argc, char **argv)
   vec3 o_axis_z = origin + axis_z;
   Rectangle* wall_rect1 = new Rectangle(origin, axis_x, axis_y, 0.2, modeltoworld, worldtomodel, transparent);
   Rectangle* wall_rect2 = new Rectangle(origin, axis_y, axis_z, 0.2, modeltoworld, worldtomodel, transparent);
-  Rectangle* wall_rect3 = new Rectangle(o_axis_x, axis_y, axis_z, 0.2, modeltoworld, worldtomodel, transparent);
+  Rectangle* wall_rect3 = new Rectangle(o_axis_x, axis_y, axis_z, 0.2, modeltoworld, worldtomodel, ground_color);
   Rectangle* wall_rect4 = new Rectangle(o_axis_z, axis_x, axis_y, 0.2, modeltoworld, worldtomodel, transparent);
   objects.push_back(wall_rect1);
   objects.push_back(wall_rect2);
