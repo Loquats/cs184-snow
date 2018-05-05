@@ -289,8 +289,8 @@ int main(int argc, char **argv)
 //  float radius = float(dim_x) / 6;
   const float pi = 3.1415926538;
   float radius = pow(3. * num_particles / (16 * pi), 1./3) * h;
-  createSphereUniformParticles(grid, num_particles, radius);
-//  createTower(grid, num_particles);
+  // createSphereUniformParticles(grid, num_particles, radius);
+  createTower(grid, num_particles);
   vector<CollisionObject *> objects;
 
   Shader baseshader("../src/shaders/camera.vert", "../src/shaders/simple.frag");
@@ -345,14 +345,14 @@ int main(int argc, char **argv)
   // objects.push_back(plow_rect);
 
   // Make the cube
-  // vec4 cube_color(0.05, 0.05, 0.05, 0.9);
-  // vec3 cube_origin = origin + vec3(0.01*grid->dim_x, 0.15*grid->dim_y, 0.45*grid->dim_z);
-  // vec3 cube_u(0.1 * grid->dim_x, 0, 0);
-  // vec3 cube_v(0, 0.1*grid->dim_y, 0);
-  // vec3 cube_w(0, 0, 0.1*grid->dim_z);
-  // Cube* cube = new Cube(cube_origin, cube_u, cube_v, cube_w, 0.2, modeltoworld, worldtomodel, cube_color);
-  // cube->set_velocity(vec3(grid->dim_x * 5.0, 0, 0));
-  // objects.push_back(cube);
+  vec4 cube_color(0.05, 0.05, 0.05, 0.9);
+  vec3 cube_origin = origin + vec3(0.01*grid->dim_x, 0.15*grid->dim_y, 0.45*grid->dim_z);
+  vec3 cube_u(0.1 * grid->dim_x, 0, 0);
+  vec3 cube_v(0, 0.1*grid->dim_y, 0);
+  vec3 cube_w(0, 0, 0.1*grid->dim_z);
+  Cube* cube = new Cube(cube_origin, cube_u, cube_v, cube_w, 0.2, modeltoworld, worldtomodel, cube_color);
+  cube->set_velocity(vec3(grid->dim_x * 1.0, 0, 0));
+  objects.push_back(cube);
 
   baseshader.use();
   snowsim->init(&camera, &baseshader, modeltoworld);
