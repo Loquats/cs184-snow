@@ -227,6 +227,7 @@ void SnowSimulator::drawContents() {
   shader->setMat4("view", view);
 //  drawGrid(glm::vec4(0.8, 0.8, 0.8, 1.0));
   drawParticles(glm::vec4(0.7, 0.7, 0.7, 0.7));
+//  drawGridNodes(glm::vec4(0.7, 0.7, 0.7, 0.7));
 //  drawGridForces();
 //  drawParticleForces();
   for (CollisionObject *co : *collision_objects) {
@@ -257,6 +258,25 @@ void SnowSimulator::drawParticles(glm::vec4 color) {
     glBindVertexArray(particle_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
   }
+}
+
+void SnowSimulator::drawGridNodes(glm::vec4 color) {
+    grid->pruneUnusedNodes();
+    grid->resetGrid();
+    for(GridNode* node : grid->nodes_in_use) {
+        if (node->particles.size() > 0) { // occupied node
+            float len = grid->h;
+            vec3 node_center = (node->index + vec3(0.5)) * grid->h;
+            glm::mat4 node_model;
+            node_model = glm::scale(node_model, glm::vec3(len, len, len));
+            node_model = modeltoworld * node_model;
+            node_model = glm::translate(glm::mat4(), node_center) * node_model;
+            shader->setVec4("in_color", color);
+            shader->setMat4("model", node_model);
+            glBindVertexArray(particle_VAO);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+    }
 }
 
 void SnowSimulator::drawGridForces() {

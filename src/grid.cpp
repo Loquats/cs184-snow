@@ -125,7 +125,7 @@ void Grid::simulate(float delta_t, vector<vec3> external_accelerations, vector<C
     }
     compute_F_hat_Ep(delta_t);                // (Step 3.)
     compute_grid_forces(params->mu_0, params->lambda_0, params->xi);  // Step 3.
-    // apply_ext_accelerations(external_accelerations);     // not a step
+//    apply_ext_accelerations(external_accelerations);     // not a step
     compute_grid_velocities(delta_t, collision_objects);    // Step 4.
                                                             // Step 5: grid-base collisions (skipped)
     // compute_time_integration();                          // Step 6: disabled b/c do not use semi-implicit integratino
@@ -247,17 +247,11 @@ void Grid::compute_grid_forces(float mu_0, float lambda_0, float xi) {
  * Apply external forces, e.g. gravity
  */
 void Grid::apply_ext_accelerations(vector<vec3> external_accelerations) {
-  for (int i = 0; i < res_x; ++i) {
-    for (int j = 0; j < res_y; ++j) {
-      for (int k = 0; k < res_z; ++k) {
-        // Explicit update: just copy it all over
-        GridNode* node = nodes[i][j][k];
+    for (GridNode *node : nodes_in_use) {
         for (vec3 acc : external_accelerations) {
-          node->force += acc * node->mass;
+            node->force += acc * node->mass;
         }
-      }
     }
-  }
 }
 
 /*
@@ -270,9 +264,8 @@ void Grid::compute_grid_velocities(float delta_t, vector<CollisionObject *> *col
             node->next_velocity += node->force * delta_t / node->mass;
         }
         vec3 position = node->index * h;
-        vec3 next_position = position + node->velocity * delta_t;
         for (CollisionObject* co : *collision_objects) {
-            // node->next_velocity = co->collide(position, next_position, node->next_velocity);
+             node->next_velocity = co->collide(position, node->next_velocity, delta_t);
         }
     }
 }

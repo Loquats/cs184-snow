@@ -47,7 +47,7 @@
   <h2 align="middle">Technical Approach</h2>
   <div align="center">
     <img src="resources/mpm-overview.png"/>
-    <figcaption>Overview of MPM. Particle mass and velocity are interpolated onto a grid, where most physics computations occur. The velocities at the next time step are interpolated back onto the particles.</figcaption>
+    <figcaption><i>Overview of MPM. Particle mass and velocity are interpolated onto a grid, where most physics computations occur. The velocities at the next time step are interpolated back onto the particles.</i></figcaption>
   </div>
   <p>
     There are many ways to simulate snow, each with strengths and weaknesses. Mesh based methods have significant trouble modeling fracture, because of the need to explicitly define fracture of a contiguous solid. Pure grid based methods struggle with plasticity because deforming a grid results in a great deal of nonlinear computation. And particle-only methods suffer from inefficiency due to a high demand for nearest neighbor queries to compute dynamics. The material point method is a simulation method well-suited for continuum materials. MPM addresses these problems by using the grid as a "scratch-pad" for computations, while maintaining Lagrangian state as point particles with mass, volume, and velocity. MPM is mesh-free and avoids directly computing interactions between particles by interpolating particle properties onto a 3D grid, a computes physics on this grid.
@@ -65,40 +65,86 @@
   </ol>
 
   <h3 align="middle">Rendering</h3>
+  <p>We decided to focus on physics over rendering for this project, and approximated the appearance of our snow by rendering the particles as translucent cubes. This gives us the ability to see how densely the snow packs, while avoiding the overhead associated with rendering using a volumetric pathtracer, which is the suggested method.</p>
+
+  <p>Our rendering is done using OpenGL primitives. We populate the VBO and VAO appropriately for a few types of objects, notably cubes, planes and grid lines.</p>
 
   <h3 align="middle">Optimizations</h3>
   <p>
-  - discretize and precompute scalar interpolation function
-  - save b-spline neighborhood weights for each particle per simulation step
-  - most grid cells are empty and not near any particles, so we only store grid cells that are actively being used, ie. within the neighborhood of a prticle
-  - threading
-  - compiler optimizations, by far one of the most effective
+    Simulating snow with a large number of particles is extremely computationally intensive, even using a relatively efficient method like MPM. We found our code to be prohibitively slow on first draft, and took numerous steps to speed it up. Some examples:
   </p>
+  <ol>
+    <li>
+      The B-spline interpolation is used for all operations transferring properties between the particles and grid. Using a C++ profiler, we discovered that computing this B-spline was taking a large proportion of the runtime. Since the B-spline weights and gradients are reused several times in one update step, this saves time.
+    </li>
+    <li>
+      Even computing the B-spline weights once per particle per update was expensive. To mitigate this further, we observed that the scalar B-spline function is nonzero only over the domain [-2,2]. We thus save time by precomputing, at the start of the program, a discretization of the B-spline (perhaps 10,000 values), and looking up interpolation weights at the start of each update step.
+      <br><br>
+      <div align="middle">
+        <img src="resources/discretization.png" />
+        <figcaption><i>An example of discretizing a function. Computed values can be stored for later lookup.</i></figcaption>
+      </div>
+      <br>
+    </li>
+    <li>
+      Another optimization comes from the insight that the grid serves only as a scratchpad for the particle computations, and only need to be modeled when a particle is nearby. Originally we computed the simulation over all of the grid nodes. This proved to be quite inefficient as the number of empty grid nodes generally vastly exceeds the number of particles. For example, when using 5000 particles on a 50 x 50 x 50 grid, there are 125,000 grid nodes. At most 5000 of them can actually contain a particle, and generally since the particles are clumped, the number of filled grid nodes is considerably lower. To resolve this, we keep a set of "in use" nodes, and only work with nodes within the particles' interpolation radii. However, the problem arises that as the simulation progresses, particles move away from some grid nodes, which become unused. To resolve this, we clear out old grid nodes periodically during the simulation.
+      <br>
+      <div align="middle">
+        <img src="resources/grid.gif" />
+        <figcaption><i>Sketch of material points (particles) on an Eulerian grid. The empty white grid cells are a target for optimization.</i></figcaption>
+      </div>
+      <br>
+    </li>
+    <li>
+      The largest speedup came simply from using the cmake flag CMAKE_BUILD_TYPE=Release. It seems a lot of C++ optimizations are nicely built in to the compiler. We achieved about 10x speedup this way.
+    </li>
+    <li>
+      We attempted to use thread pools to parallelize our computation, but ran into issues with critical data. We had trouble installing OpenMP on OS X, and so only had access to low-level threading primitives without easy-to-use abstractions.
+    </li>
+  </ol>
   <h3 align="middle">Miscellaneous</h3>
   <p>
     Our implementation also provides a way to save simulations as videos. In addition to the live rendering, the program optionally saves the rendered frames into an .avi video file. This is especially useful for rendering at high grid resolution to improve physics accuracy, where each frame takes a few seconds or minutes to compute. 
   </p>
   <h3 align="middle">Problems</h3>
   <p>
-    The biggest problem we encountered was runtime efficiency. Our initial implementation focused on getting everything to work, but was very inefficient, so after the initial implementation, we spent a lot of time rewriting the code for efficiency, as described in the "Optimization" section.
+    The biggest problem we encountered was runtime efficiency. Our initial implementation focused on getting everything to work, but was very inefficient, so after the initial implementation, we spent a lot of time rewriting the code for efficiency, as described in the "Optimization" section. With greater optimization came increasing complexity, as we discovered/introduced weirder and weirder bugs in our code over time.
   </p>
   <p>
-    Another major challenge was CMake, and integrating/compiling the various libraries we used. This was our first time working with CMake. Each library seemed to have a slightly different way of integrating, and given our limited experience, figuring it the integration involved much trial and error. 
+    Another major challenge was CMake, and integrating/compiling the various libraries we used. This was our first time working with CMake. Each library seemed to have a slightly different way of integrating, and given our limited experience, figuring it the integration involved much trial and error. Furthermore, we were entirely unable to compile our project on Ubuntu machines (e.g. home desktops, instructional machines) due to system-specific compilation issues.
   </p>
   <h3 align="middle">Lessons Learned</h3>
+  <p>
+    Starting this project, we worried that it would be next to impossible to debug our simulation code. Since the individual steps don't have a very interpretable or testable effect on the particles, we figured it would be hard to tell if our computations were accurate. Even visualizing something like the grid forces would yield vague insight at best without additional expertise. Ultimately, what we are all intuitively familiar with is the visualized dynamics of snow, so we eventually were forced to simply visually inspect our results for debugging. This ended up being easier than we thought; some bugs exhibit quite obvious patterns when visualized, especially when the simulation quality is reduced to allow for real-time simulation for debugging purposes. Between this and careful proofreading of the code, we were able to catch all the bugs. In the future, if the source materials provide clear explanation (which the Stomakhin paper generally did), we can be less wary to implement our pipeline end-to-end.
+  </p>
+  <p>
+    Despite our optimizations, we were not able to scale up our simulation to reference numbers given in the Stomakhin paper. However, we were still able to see some plausible snow dynamics. This is a good reminder that in graphics, one's work does not have to be perfect to produce valuable results.
+  </p>
+  <p>
+    On the other hand, in terms of frameworks, setup and system specifics, we underestimated the degree to which problems would arise. This may partly be the result of us starting our project on a barebones basis, and may also be partly because graphics code appears to be very beginner-unfriendly. There doesn't seem to be any way around this other than just getting good at it, but good to keep in mind.
+  </p>
 
   <h2 align="middle">Results</h2>
 
   <h2 align="middle">Contribution Breakdown</h2>
+  <p>
+    Ankit bootstrapped all of the OpenGL setup (shaders, VBO/VAO/basic drawing stuff) as well as wrangling with GLFW. He implemented most of the user/GUI features e.g. camera panning/movement, and also discovered and/or wrote many of the simulation optimizations. Finally, to his great disdain, he also tackled a great many CMake-related issues.
+  </p>
+  <p>
+    Andy set up the libraries and the first 3 steps of the physics simulation using GLM and Eigen, including the initial code for interpolation, SVD, etc. He also implemented several features in collision code, set up test scenes, and determined good demos for said scenes by tweaking simulation parameters. Finally, he worked on the milestone and final submission deliverables.
+  </p>
+  <p>
+    Brandon wrote the rest of the physics simulation and optimized grid node usage. He also took care of refactors to the Grid class, wrote collision code, set up test scenes, and wrote sampling routines to populate snow objects with randomly distributed particles. Finally, he also worked on the milestone and final submission deliverables.
+  </p>
 
   <h2 align="middle">References</h2>
-  - snow paper
-  - snow paper tech report
-  - GLAD
-  _ GLFW
-  - GLM
-  - Eigen
-  - some threading library on github
-  - Sifakis svd?
+  <ol>
+    <li>http://alexey.stomakhin.com/research/snow.html</li>
+    <li>https://learnopengl.com/</li>
+    <li>https://github.com/Dav1dde/glad</li>
+    <li>http://www.glfw.org/docs/latest/quick.html</li>
+    <li>https://glm.g-truc.net/0.9.8/index.html</li>
+    <li>http://eigen.tuxfamily.org/index.php?title=Main_Page</li>
+  </ol>
 </body>
 </html>

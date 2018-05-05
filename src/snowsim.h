@@ -40,6 +40,7 @@ public:
 private:
   void drawGrid(vec4 color);
   void drawParticles(vec4 color);
+  void drawGridNodes(vec4 color);
   void drawGridForces();
   void drawParticleForces();
 
