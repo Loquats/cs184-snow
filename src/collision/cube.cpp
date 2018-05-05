@@ -5,9 +5,9 @@ using namespace glm;
 
 vec3 Cube::collide(vec3 position, vec3 velocity, float delta_t) {
   // TODO: this seems kinda change
-  // for (Rectangle* rect : faces) {
-  //   velocity = rect->collide(position, velocity, delta_t);
-  // }
+  for (Rectangle* rect : faces) {
+    velocity = rect->collide(position, velocity, delta_t);
+  }
   return velocity;
 }
 
