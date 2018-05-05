@@ -351,7 +351,7 @@ int main(int argc, char **argv)
   vec3 cube_v(0, 0.1*grid->dim_y, 0);
   vec3 cube_w(0, 0, 0.1*grid->dim_z);
   Cube* cube = new Cube(cube_origin, cube_u, cube_v, cube_w, 0.2, modeltoworld, worldtomodel, cube_color);
-  cube->set_velocity(vec3(grid->dim_x * 1.0, 0, 0));
+  cube->set_velocity(vec3(grid->dim_x * 4.0, 0, 0));
   objects.push_back(cube);
 
   baseshader.use();
