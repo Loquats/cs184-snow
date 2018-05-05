@@ -11,6 +11,8 @@ void createOneToOneParticles(Grid *grid);
 
 void createSphereUniformParticles(Grid *grid, int num_particles, float radius);
 
+void createTower(Grid *grid, int num_particles);
+
 void createTwoParticles(Grid *grid);
 
 #endif //SNOW_SAMPLING_H

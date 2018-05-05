@@ -18,3 +18,17 @@ void createSphereUniformParticles(Grid *grid, int num_particles, float radius) {
     }
     grid->resetGrid();
 }
+
+void createTower(Grid *grid, int num_particles) {
+    vec3 grid_dim = vec3(grid->dim_x, grid->dim_y, grid->dim_z);
+    vec3 tower_dim = vec3(grid_dim.x * 0.2, grid_dim.y * 0.5, grid_dim.z * 0.2);
+    vec3 tower_origin = vec3(grid_dim.x - tower_dim.x, 0.0, grid_dim.z - tower_dim.z) / 2.0f;
+
+    for (int i = 0; i < num_particles; i++) {
+        vec3 sample_position = linearRand(tower_origin, tower_origin + tower_dim);
+        Particle* p = new Particle(sample_position, 10, vec3(grid->res_x, grid->res_y, grid->res_z), grid->h);
+        p->velocity = vec3(0.0);
+        grid->all_particles.push_back(p);
+    }
+    grid->resetGrid();
+}
