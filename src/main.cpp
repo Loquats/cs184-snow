@@ -22,7 +22,7 @@ using namespace std;
 int SCR_WIDTH = 800;
 int SCR_HEIGHT = 600;
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 10.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 7.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -170,6 +170,8 @@ int main(int argc, char **argv)
   float theta_s = 7.5e-3;       // Critical stretch
   float alpha = 0.95;           // FLIP/PIC ratio
 
+  float mu = 1.0; // static friction
+
   int num_particles = 1000;
 
   if (argc == 1) { // No arguments, default initialization
@@ -177,7 +179,7 @@ int main(int argc, char **argv)
   } else {
     int c;
 
-    while ((c = getopt (argc, argv, "o:l:n:ht:E:u:x:c:s:a:p:")) != -1) {
+    while ((c = getopt (argc, argv, "o:l:n:ht:E:u:x:c:s:a:p:m:")) != -1) {
       switch (c) {
         case 'h':
           headless = true;
@@ -215,6 +217,9 @@ int main(int argc, char **argv)
         case 'a':
           alpha = atof(optarg);
           break;
+        case 'm':
+          mu = atof(optarg);
+          break;
         default:
           cout << optopt;
           break;
@@ -234,6 +239,7 @@ int main(int argc, char **argv)
   cout << "theta_c: " << theta_c << endl;
   cout << "theta_s: " << theta_s << endl;
   cout << "alpha: " << alpha << endl;
+  cout << "mu (friction): " << mu << endl;
   cout << "num_particles: " << num_particles << endl;
   cout << endl << endl;
 
@@ -253,9 +259,9 @@ int main(int argc, char **argv)
 
   glGetError(); // pull and ignore unhandled errors like GL_INVALID_ENUM
 
-  int res_x = 20;
-  int res_y = 20;
-  int res_z = 20;
+  int res_x = 30;
+  int res_y = 30;
+  int res_z = 30;
   vec3 dim(res_x, res_y, res_z);
   float h = 5. / res_y;
 
@@ -283,7 +289,7 @@ int main(int argc, char **argv)
   const float pi = 3.1415926538;
   float radius = pow(3. * num_particles / (16 * pi), 1./3) * h;
   createSphereUniformParticles(grid, num_particles, radius);
-  // createTwoParticles(grid);
+//  createTower(grid, num_particles);
   vector<CollisionObject *> objects;
 
   Shader baseshader("../src/shaders/camera.vert", "../src/shaders/simple.frag");
