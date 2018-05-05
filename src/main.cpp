@@ -289,8 +289,8 @@ int main(int argc, char **argv)
 //  float radius = float(dim_x) / 6;
   const float pi = 3.1415926538;
   float radius = pow(3. * num_particles / (16 * pi), 1./3) * h;
-  createSphereUniformParticles(grid, num_particles, radius);
-//  createTower(grid, num_particles);
+  // createSphereUniformParticles(grid, num_particles, radius);
+  createTower(grid, num_particles);
   vector<CollisionObject *> objects;
 
   Shader baseshader("../src/shaders/camera.vert", "../src/shaders/simple.frag");
@@ -307,10 +307,10 @@ int main(int argc, char **argv)
   vec4 transparent = vec4(0, 0, 0, 0);
   vec3 o_axis_x = origin + axis_x;
   vec3 o_axis_z = origin + axis_z;
-  Rectangle* wall_rect1 = new Rectangle(origin, axis_x, axis_y, 0.2, modeltoworld, worldtomodel, transparent);
-  Rectangle* wall_rect2 = new Rectangle(origin, axis_y, axis_z, 0.2, modeltoworld, worldtomodel, transparent);
-  Rectangle* wall_rect3 = new Rectangle(o_axis_x, axis_y, axis_z, 0.2, modeltoworld, worldtomodel, transparent);
-  Rectangle* wall_rect4 = new Rectangle(o_axis_z, axis_x, axis_y, 0.2, modeltoworld, worldtomodel, transparent);
+  Rectangle* wall_rect1 = new Rectangle(origin, axis_x, axis_y, 0.0002, modeltoworld, worldtomodel, transparent);
+  Rectangle* wall_rect2 = new Rectangle(origin, axis_y, axis_z, 0.0002, modeltoworld, worldtomodel, transparent);
+  Rectangle* wall_rect3 = new Rectangle(o_axis_x, axis_y, axis_z, 0.0002, modeltoworld, worldtomodel, transparent);
+  Rectangle* wall_rect4 = new Rectangle(o_axis_z, axis_x, axis_y, 0.0002, modeltoworld, worldtomodel, transparent);
   objects.push_back(wall_rect1);
   objects.push_back(wall_rect2);
   objects.push_back(wall_rect3);
@@ -336,13 +336,13 @@ int main(int argc, char **argv)
 //  Rectangle* wedge_rect1 = new Rectangle(corner, top_edge, edge1, mu, modeltoworld, worldtomodel, wedge_color);
 
   // Make the snowplow
-  // vec4 plow_color(1.0, 0.95, 0.45, 1.0);
-  // vec3 plow_origin = origin + vec3(0.1*grid->dim_x, -0.1*grid->dim_y, 0.1*grid->dim_z);
-  // vec3 plow_width(0, 0, 0.5 * grid->dim_z);
-  // vec3 plow_height(0, 0.25*grid->dim_y, 0);
-  // Rectangle* plow_rect = new Rectangle(plow_origin, plow_width, plow_height, 0.2, modeltoworld, worldtomodel, plow_color);
-  // plow_rect->set_velocity(vec3(grid->dim_x * 0.2, 0, 0));
-  // objects.push_back(plow_rect);
+  vec4 plow_color(1.0, 0.95, 0.45, 1.0);
+  vec3 plow_origin = origin + vec3(0.1*grid->dim_x, -0.1*grid->dim_y, 0.1*grid->dim_z);
+  vec3 plow_width(-0.075*grid->dim_x, 0, 0.5 * grid->dim_z);
+  vec3 plow_height(0, 0.25*grid->dim_y, 0);
+  Rectangle* plow_rect = new Rectangle(plow_origin, plow_width, plow_height, 0.2, modeltoworld, worldtomodel, plow_color);
+  plow_rect->set_velocity(vec3(grid->dim_x * 1, 0, 0));
+  objects.push_back(plow_rect);
 
   // Make the cube
   // vec4 cube_color(0.05, 0.05, 0.05, 0.9);
